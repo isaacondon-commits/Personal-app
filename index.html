@@ -255,6 +255,24 @@ textarea{resize:vertical;min-height:64px}
   </div>
 </div>
 
+<!-- MODAL HORA -->
+<div class="mo" id="mo-hora">
+  <div class="mo-box">
+    <div class="mo-title">Registrar horas extra</div>
+    <div class="fg fg2">
+      <div class="ff" style="grid-column:1/-1"><span class="fl">Empleado</span><select id="mh-emp"></select></div>
+      <div class="ff"><span class="fl">Fecha</span><input type="date" id="mh-fecha"></div>
+      <div class="ff"><span class="fl">Cantidad de horas</span><input type="number" id="mh-horas" min="0.5" step="0.5" placeholder="ej: 2"></div>
+    </div>
+    <div class="ff" style="margin-bottom:16px"><span class="fl">Motivo</span><textarea id="mh-motivo" placeholder="ej: Cierre de campaña, cobertura turno..."></textarea></div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:14px">Las horas quedan como pendientes hasta que RRHH las apruebe.</div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeMo('mo-hora')">Cancelar</button>
+      <button class="btn btn-a" onclick="guardarHora()">Registrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL FALTA -->
 <div class="mo" id="mo-falta">
   <div class="mo-box">
@@ -289,10 +307,13 @@ textarea{resize:vertical;min-height:64px}
     <div class="fg fg2">
       <div class="ff" style="grid-column:1/-1"><span class="fl">Nombre completo</span><input type="text" id="me-nombre"></div>
       <div class="ff"><span class="fl">Cédula</span><input type="text" id="me-cedula" placeholder="ej: 5728223-5"></div>
-      <div class="ff"><span class="fl">Rol</span><select id="me-rol"><option value="vendedor">Vendedor</option><option value="supervisor">Supervisor</option><option value="rrhh">RRHH</option></select></div>
+      <div class="ff"><span class="fl">Cargo</span><select id="me-rol"><option value="vendedor">Vendedor</option><option value="atc">Atc</option><option value="back">Back</option><option value="supervisor">Supervisor</option><option value="limpieza">Limpieza</option></select></div>
       <div class="ff"><span class="fl">Fecha de ingreso</span><input type="date" id="me-ingreso"></div>
       <div class="ff"><span class="fl">Contrato</span><select id="me-contrato"><option value="indefinido">Indefinido</option><option value="temporal">Temporal</option><option value="pasante">Pasante</option></select></div>
       <div class="ff"><span class="fl">Estado</span><select id="me-estado"><option value="activo">Activo</option><option value="inactivo">Inactivo</option><option value="licencia">En licencia</option></select></div>
+      <div class="ff"><span class="fl">Teléfono</span><input type="text" id="me-tel" placeholder="ej: 099123456"></div>
+      <div class="ff"><span class="fl">Dirección</span><input type="text" id="me-dir" placeholder="ej: Av. 18 de julio 1234"></div>
+      <div class="ff" style="grid-column:1/-1"><span class="fl">Contacto de emergencia</span><input type="text" id="me-emerg" placeholder="ej: María López (madre) 099456789"></div>
     </div>
     <div class="form-actions">
       <button class="btn" onclick="closeMo('mo-emp')">Cancelar</button>
@@ -310,7 +331,7 @@ const app=initializeApp(FC);
 const db=getDatabase(app);
 
 // STATE
-let CU=null,empleados=[],faltas=[],ventas=[],curPage='';
+let CU=null,empleados=[],faltas=[],ventas=[],horas=[],curPage='';
 const AVC=['c1','c2','c3','c4','c5'];
 const ini=n=>n.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const avc=i=>AVC[i%AVC.length];
@@ -367,55 +388,79 @@ function matchNombre(a,b){
 }
 
 const EMPLEADOS_SEED=[
-  {cedula:'5728223-5', nombre:'Abigail Yemima Acosta Campos'},
-  {cedula:'5302549-1', nombre:'Agustina Floren Dos Reis Castro'},
-  {cedula:'5338608-5', nombre:'Agustina Belen Sanchez Mieres'},
-  {cedula:'5519182-6', nombre:'Alejandra Nicol Lima Bitancourt'},
-  {cedula:'5613125-5', nombre:'Alexandra Mairen Diaz Sabatar'},
-  {cedula:'5263563-3', nombre:'Alison Lucia Redon Cordero'},
-  {cedula:'5481927-5', nombre:'Ayelen Rodriguez'},
-  {cedula:'5290556-1', nombre:'Barbara Gabriela Mendieta Da Silva'},
-  {cedula:'5433139-8', nombre:'Brenda Vanina Martinez Rodriguez'},
-  {cedula:'5404540-4', nombre:'Brisa Camila Silveira Perez'},
-  {cedula:'5259794-4', nombre:'Camila Belen De Los Santos Alvarez'},
-  {cedula:'5348830-8', nombre:'Camila Magali Alvez Alvez'},
-  {cedula:'5527154-3', nombre:'Cecilia Antonella Albornoz Silva'},
-  {cedula:'5505527-6', nombre:'Eliana Izquierdo Vintor'},
-  {cedula:'5617149-5', nombre:'Erika Valentina Simone Valiente'},
-  {cedula:'55981989',  nombre:'Eugenia Zapatta Vazquez'},
-  {cedula:'5401422-9', nombre:'Facundo Daniel Priario Pereira'},
-  {cedula:'6441884-5', nombre:'Isaac Condon'},
-  {cedula:'5190762-1', nombre:'Florencia Valentina Aldacor Larrosa'},
-  {cedula:'6585048-0', nombre:'Francisco Javier Robles'},
-  {cedula:'52629410',  nombre:'Georgina Tamara Nunez Calabuig'},
-  {cedula:'5510444-5', nombre:'Josefina Cupparo Ramos'},
-  {cedula:'5197897-7', nombre:'Joseline Barrios Brian'},
-  {cedula:'5012395-3', nombre:'Juan Manuel Martinez Puig'},
-  {cedula:'5509813-9', nombre:'Katerine Yuliana Tabeira Rodriguez'},
-  {cedula:'56447559',  nombre:'Katherine Lilian Nereitter Lima'},
-  {cedula:'5311907-6', nombre:'Lautaro Lopez Montana'},
-  {cedula:'3426331-9', nombre:'Lorena Paola Gonzalez Dominguez'},
-  {cedula:'5807053-2', nombre:'Lucia Alvarez Mendez'},
-  {cedula:'5446706-4', nombre:'Lucia Belen Lopez Bustos'},
-  {cedula:'5174246-9', nombre:'Luna Jazmin Delgado Suarez'},
-  {cedula:'5597754-1', nombre:'Lusmila Camila Lanusse Alvarez'},
-  {cedula:'5203606-1', nombre:'Maira Camila Lavega Gonzalez'},
-  {cedula:'4876531-9', nombre:'Maria Milena Milan Nunez'},
-  {cedula:'5167041-8', nombre:'Mateo Gabriel Meliton Pereira'},
-  {cedula:'5465307-5', nombre:'Micaela Miranda Fedulo'},
-  {cedula:'5650551-7', nombre:'Micaela Steiner Vaccarezza'},
-  {cedula:'4862875-9', nombre:'Mikaela Rodriguez Toledo'},
-  {cedula:'54382745',  nombre:'Nahomi Micaela Coronel Alvez'},
-  {cedula:'4762422-9', nombre:'Naitsa Sheila Lopez Cresciente'},
-  {cedula:'5578580-9', nombre:'Noel Alfonso Rodriguez'},
-  {cedula:'5492005-8', nombre:'Oriana Yanaina Silva Rodriguez'},
-  {cedula:'5375730-1', nombre:'Pamela Fernanda Lagues Lopez'},
-  {cedula:'5335194-5', nombre:'Romina Serron Olivera'},
-  {cedula:'5445368-9', nombre:'Saya Da Silva'},
-  {cedula:'5625939-6', nombre:'Shanti Acuna Martinez'},
-  {cedula:'5241863-5', nombre:'Valentina Montana Deganello'},
-  {cedula:'5747977-3', nombre:'Valentina Florencia Pintos Cardozo'},
-  {cedula:'5544069-1', nombre:'Vanessa Fabiana Ramos Babon'},
+  // FIBRA
+  {cedula:'5597754-1', nombre:'Lusmila Camila Lanusse Alvarez', cargo:'vendedor'},
+  {cedula:'5263563-3', nombre:'Alison Lucia Redon Cordero', cargo:'vendedor'},
+  {cedula:'5259794-4', nombre:'Camila Belen De Los Santos Alvarez', cargo:'vendedor'},
+  {cedula:'5527154-3', nombre:'Cecilia Antonella Albornoz Silva', cargo:'vendedor'},
+  {cedula:'5229704-5', nombre:'Camila Loriana Perdomo Ferreira', cargo:'vendedor'},
+  {cedula:'5492005-8', nombre:'Oriana Yanaina Silva Rodriguez', cargo:'vendedor'},
+  {cedula:'5659035-4', nombre:'Mariangeles Victoria Guerra Sellanes', cargo:'vendedor'},
+  {cedula:'5597198-9', nombre:'Eugenia Zapatta Vazquez', cargo:'vendedor'},
+  {cedula:'5544501-1', nombre:'Abril Agustina Gonzalez Gonzalez', cargo:'vendedor'},
+  {cedula:'5747977-3', nombre:'Valentina Florencia Pintos Cardozo', cargo:'vendedor'},
+  {cedula:'5625939-6', nombre:'Shanti Acuna Martinez', cargo:'vendedor'},
+  {cedula:'5481927-5', nombre:'Ayelen Rodriguez', cargo:'vendedor'},
+  {cedula:'5174246-9', nombre:'Luna Jazmin Delgado Suarez', cargo:'vendedor'},
+  {cedula:'5617149-5', nombre:'Valentina Erika Simone Valiente', cargo:'vendedor'},
+  {cedula:'5404540-4', nombre:'Brisa Camila Silveira Perez', cargo:'vendedor'},
+  {cedula:'5449391-0', nombre:'Lucia Morales', cargo:'vendedor'},
+  {cedula:'5510444-5', nombre:'Josefina Cupparo Ramos', cargo:'vendedor'},
+  {cedula:'5321820-6', nombre:'Katherin Balestie', cargo:'vendedor'},
+  {cedula:'5438274-5', nombre:'Nahomi Micaela Coronel Alvez', cargo:'vendedor'},
+  {cedula:'5290556-1', nombre:'Barbara Gabriela Mendieta Da Silva', cargo:'vendedor'},
+  {cedula:'5203606-1', nombre:'Maira Camila Lavega Gonzalez', cargo:'vendedor'},
+  {cedula:'5239566-3', nombre:'Florencia Pajares', cargo:'vendedor'},
+  {cedula:'5728223-5', nombre:'Abigail Yemima Acosta Campos', cargo:'vendedor'},
+  {cedula:'5433139-8', nombre:'Brenda Vanina Martinez Rodriguez', cargo:'vendedor'},
+  {cedula:'5262941-0', nombre:'Georgina Tamara Nunez Calabuig', cargo:'vendedor'},
+  {cedula:'5519182-6', nombre:'Alejandra Nicol Lima Bitancourt', cargo:'vendedor'},
+  {cedula:'5465307-5', nombre:'Micaela Miranda Fedulo', cargo:'vendedor'},
+  {cedula:'5401422-9', nombre:'Facundo Daniel Priario Pereira', cargo:'vendedor'},
+  {cedula:'5302549-1', nombre:'Agustina Floren Dos Reis Castro', cargo:'vendedor'},
+  {cedula:'5544069-1', nombre:'Vanessa Fabiana Ramos Babon', cargo:'vendedor'},
+  {cedula:'5012395-3', nombre:'Juan Manuel Martinez Puig', cargo:'vendedor'},
+  {cedula:'5197897-7', nombre:'Joseline Barrios Brian', cargo:'vendedor'},
+  {cedula:'5375730-1', nombre:'Pamela Fernanda Lagues Lopez', cargo:'vendedor'},
+  {cedula:'5644755-9', nombre:'Katherine Lilian Nereitter Lima', cargo:'vendedor'},
+  {cedula:'5695140-1', nombre:'Mariana Sagasta', cargo:'vendedor'},
+  // MÓVILES
+  {cedula:'55769990',  nombre:'Delfina Garcia', cargo:'vendedor'},
+  {cedula:'4908986-3', nombre:'Fernanda Ribeiro', cargo:'vendedor'},
+  {cedula:'4988050-6', nombre:'Sofia Barrios', cargo:'vendedor'},
+  {cedula:'4446289-0', nombre:'Daniela Vallari', cargo:'vendedor'},
+  {cedula:'4717021-2', nombre:'Marcia San Martin', cargo:'vendedor'},
+  {cedula:'5165559-7', nombre:'Victoria Garro', cargo:'vendedor'},
+  {cedula:'5601882-9', nombre:'Leandro Nauar', cargo:'vendedor'},
+  {cedula:'5504507-9', nombre:'Luna Acosta', cargo:'vendedor'},
+  {cedula:'5541898-9', nombre:'Macarena Cruz', cargo:'vendedor'},
+  {cedula:'5589396-9', nombre:'Kiara Ferreira', cargo:'vendedor'},
+  {cedula:'5384373-0', nombre:'Agustina De Leon', cargo:'vendedor'},
+  {cedula:'5366700-1', nombre:'Guadriela Luna', cargo:'vendedor'},
+  {cedula:'5576286-7', nombre:'Victoria Munoz', cargo:'vendedor'},
+  {cedula:'5423199-8', nombre:'Agustina Oviedo', cargo:'vendedor'},
+  {cedula:'5479390-0', nombre:'Federica Catalano', cargo:'vendedor'},
+  {cedula:'4951843-2', nombre:'Romina Ximenez', cargo:'vendedor'},
+  {cedula:'5519805-6', nombre:'Maria De Los Angeles Cano', cargo:'vendedor'},
+  {cedula:'5603361-5', nombre:'Sol Echeverria', cargo:'vendedor'},
+  // ATC
+  {cedula:'5241863-5', nombre:'Valentina Montana Deganello', cargo:'atc'},
+  {cedula:'4876531-9', nombre:'Maria Milena Milan Nunez', cargo:'atc'},
+  {cedula:'5505527-6', nombre:'Eliana Izquierdo Vintor', cargo:'atc'},
+  {cedula:'5608916-9', nombre:'Camila Rossi', cargo:'atc'},
+  {cedula:'5190762-1', nombre:'Florencia Valentina Aldacor Larrosa', cargo:'atc'},
+  {cedula:'4862875-9', nombre:'Mikaela Rodriguez Toledo', cargo:'atc'},
+  {cedula:'5282437-3', nombre:'Jose Flores', cargo:'atc'},
+  // BACK OFFICE
+  {cedula:'5613125-5', nombre:'Alexandra Mairen Diaz Sabatar', cargo:'back'},
+  {cedula:'5603461-9', nombre:'Alison Perez', cargo:'back'},
+  {cedula:'5016480-2', nombre:'Cristian Hernandez', cargo:'back'},
+  {cedula:'6720924-3', nombre:'Lilisbet Vazquez', cargo:'back'},
+  {cedula:'5595027-4', nombre:'Enrique Dionisio', cargo:'back'},
+  // SUPERVISOR
+  {cedula:'6441884-5', nombre:'Isaac Condon', cargo:'supervisor'},
+  // LIMPIEZA
+  {cedula:'3426331-9', nombre:'Lorena Paola Gonzalez Dominguez', cargo:'limpieza'},
 ];
 
 // INIT
@@ -466,10 +511,32 @@ window.doLogout=()=>{CU=null;sessionStorage.removeItem('pa_u');showLogin();};
 document.getElementById('li-pass').addEventListener('keydown',e=>{if(e.key==='Enter')window.doLogin();});
 
 async function loadData(){
-  const[e,f,v]=await Promise.all([dbGet('empleados'),dbGet('faltas'),dbGet('ventas')]);
+  const[e,f,v,h]=await Promise.all([dbGet('empleados'),dbGet('faltas'),dbGet('ventas'),dbGet('horas')]);
   empleados=e?Object.entries(e).map(([id,v])=>({id,...v})):[];
   faltas=f?Object.entries(f).map(([id,v])=>({id,...v})):[];
   ventas=v?Object.entries(v).map(([id,v])=>({id,...v})):[];
+  horas=h?Object.entries(h).map(([id,v])=>({id,...v})):[];
+  // Auto-actualizar cargos y agregar empleados faltantes en segundo plano
+  autoSyncPersonal();
+}
+
+async function autoSyncPersonal(){
+  for(const seed of EMPLEADOS_SEED){
+    const emp=empleados.find(e=>matchNombre(e.nombre,seed.nombre)||e.cedula===seed.cedula);
+    if(emp){
+      // Actualizar cargo y cédula si difieren
+      if(emp.cargo!==seed.cargo||emp.cedula!==seed.cedula){
+        const updated={...emp,cargo:seed.cargo,cedula:seed.cedula};
+        await dbSet('empleados/'+emp.id,{nombre:updated.nombre,cedula:updated.cedula,cargo:updated.cargo,ingreso:updated.ingreso||'',contrato:updated.contrato||'indefinido',estado:updated.estado||'activo',tel:updated.tel||'',dir:updated.dir||'',emergencia:updated.emergencia||''});
+        const idx=empleados.findIndex(e=>e.id===emp.id);
+        if(idx>=0) empleados[idx]=updated;
+      }
+    } else {
+      // Agregar si no existe
+      const r=await dbPush('empleados',{nombre:seed.nombre,cedula:seed.cedula,cargo:seed.cargo,ingreso:'',contrato:'indefinido',estado:'activo',tel:'',dir:'',emergencia:''});
+      empleados.push({id:r.key,nombre:seed.nombre,cedula:seed.cedula,cargo:seed.cargo,ingreso:'',contrato:'indefinido',estado:'activo',tel:'',dir:'',emergencia:''});
+    }
+  }
 }
 
 // NAV
@@ -522,6 +589,7 @@ const ventasMes=()=>ventas.filter(v=>v.fecha&&v.fecha.startsWith(mes()));
 function pgDashboard(el){
   const tf=faltas.filter(f=>f.fecha?.startsWith(mes())).length;
   const cf=new Set(faltas.filter(f=>f.fecha?.startsWith(mes())).map(f=>f.empleadoId)).size;
+  const hp=horas.filter(h=>h.fecha?.startsWith(mes())&&h.estado==='pendiente').length;
   el.innerHTML=`
     <div class="page-title">Inicio</div>
     <div class="page-sub">${new Date().toLocaleDateString('es-UY',{month:'long',year:'numeric'})}</div>
@@ -529,13 +597,13 @@ function pgDashboard(el){
       <div class="mc"><div class="mc-label">Empleados</div><div class="mc-value">${empleados.length}</div><div class="mc-sub">activos en el sistema</div></div>
       <div class="mc"><div class="mc-label">Ventas del mes</div><div class="mc-value">${ventasMes().length}</div><div class="mc-sub">cargadas</div></div>
       <div class="mc"><div class="mc-label">Faltas este mes</div><div class="mc-value">${tf}</div><div class="mc-sub">${cf} empleado${cf!==1?'s':''}</div></div>
-      <div class="mc"><div class="mc-label">Sin faltas</div><div class="mc-value">${empleados.length-cf}</div><div class="mc-sub">empleados</div></div>
+      <div class="mc"><div class="mc-label">HE pendientes</div><div class="mc-value">${hp}</div><div class="mc-sub">por aprobar</div></div>
     </div>
     <div class="g2">
       <div class="card">
         <div class="card-hdr"><span class="card-title">Accesos rápidos</span></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          ${[['ventas','Ventas','#60a5fa'],['comisiones','Comisiones','#3ecf8e'],['faltas','Faltas','#f87171'],['simulador','Simulador','#c084fc']].map(([id,l,c])=>`
+          ${[['ventas','Ventas','#60a5fa'],['comisiones','Comisiones','#3ecf8e'],['faltas','Faltas','#f87171'],['horas','Horas extra','#f59e0b']].map(([id,l,c])=>`
           <button class="btn" onclick="nav('${id}')" style="display:flex;align-items:center;gap:8px;padding:10px 12px;justify-content:flex-start">
             <div style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0"></div>${l}
           </button>`).join('')}
@@ -563,23 +631,13 @@ function pgEquipo(el){
     <div class="card">
       <div class="card-hdr"><span class="card-title">Empleados (${empleados.length})</span><button class="btn btn-a btn-sm" onclick="openModalEmp()">+ Nuevo</button></div>
       ${empleados.length===0?'<div class="empty">No hay empleados. Agregá el primero.</div>':
-      `<div class="tw"><table><thead><tr><th>Nombre</th><th>Rol</th><th>Faltas</th><th>Ventas mes</th><th>Condición</th><th></th></tr></thead>
-      <tbody>${empleados.map((e,i)=>{
-        const nf=cntFaltas(e.id);
-        const ev=ventasMes().filter(v=>v.vendedor===e.nombre);
-        const tv=ev.length;
-        let cond,cc;
-        if(tv<50){cond='No cobra';cc='br';}
-        else if(tv>=80&&nf===0){cond='Tabla 80';cc='bg';}
-        else{cond='Tabla 50';cc='ba';}
-        return`<tr>
-          <td><div style="display:flex;align-items:center;gap:8px"><div class="av av-sm ${avc(i)}">${ini(e.nombre)}</div>${e.nombre}</div></td>
-          <td style="color:var(--text2)">${e.rol||'vendedor'}</td>
-          <td>${nf===0?'<span class="badge bg">0</span>':nf<=2?`<span class="badge ba">${nf}</span>`:`<span class="badge br">${nf}</span>`}</td>
-          <td style="font-family:var(--mono)">${tv}</td>
-          <td><span class="badge ${cc}">${cond}</span></td>
-          <td><button class="btn btn-sm" onclick="openModalEmp('${e.id}')">Editar</button></td>
-        </tr>`;}).join('')}
+      `<div class="tw"><table><thead><tr><th>Nombre</th><th>Cédula</th><th>Cargo</th><th></th></tr></thead>
+      <tbody>${empleados.map((e,i)=>`<tr>
+        <td><div style="display:flex;align-items:center;gap:8px"><div class="av av-sm ${avc(i)}">${ini(e.nombre)}</div>${e.nombre}</div></td>
+        <td style="font-family:var(--mono);color:var(--text2)">${e.cedula||'—'}</td>
+        <td style="color:var(--text2)">${e?.cargo||e?.rol||'vendedor'}</td>
+        <td><button class="btn btn-sm" onclick="openModalEmp('${e.id}')">Editar</button></td>
+      </tr>`).join('')}
       </tbody></table></div>`}
     </div>`;
 }
@@ -799,9 +857,15 @@ function pgFaltas(el){
   el.innerHTML=`
     <div class="page-title">Faltas y ausencias</div>
     <div class="page-sub">${new Date().toLocaleDateString('es-UY',{month:'long',year:'numeric'})}</div>
-    <div class="card" style="margin-bottom:14px">
-      <div class="card-hdr"><span class="card-title">Contador rápido</span><button class="btn btn-a btn-sm" onclick="openModalFalta(null)">+ Registrar con detalle</button></div>
-      <div class="vgrid" id="fgrid" style="margin:0"></div>
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">Empleados</span>
+        <button class="btn btn-a btn-sm" onclick="openModalFalta(null)">+ Registrar falta</button>
+      </div>
+      <div class="tw"><table>
+        <thead><tr><th>Empleado</th><th>Faltas</th><th>Injust.</th><th>Just.</th><th>Médica/Lic.</th><th></th></tr></thead>
+        <tbody id="faltas-tabla"></tbody>
+      </table></div>
     </div>
     <div class="card">
       <div class="card-hdr">
@@ -813,36 +877,34 @@ function pgFaltas(el){
       </div>
       <div id="fhist"></div>
     </div>`;
-  rFaltasGrid();rFaltasHist();
+  rFaltasTabla();
+  rFaltasHist();
 }
 
-function rFaltasGrid(){
-  const g=document.getElementById('fgrid');if(!g)return;
-  if(empleados.length===0){g.innerHTML='<div class="empty">No hay empleados. Agregá desde Legajos.</div>';return;}
-  g.innerHTML=empleados.map((e,i)=>{
-    const nf=cntFaltas(e.id);
-    const cls=nf===0?'cv-ok':nf<=2?'cv-warn':'cv-danger';
+function rFaltasTabla(){
+  const tbody=document.getElementById('faltas-tabla');if(!tbody)return;
+  if(empleados.length===0){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:2rem">No hay empleados registrados.</td></tr>';return;}
+  tbody.innerHTML=empleados.map((e,i)=>{
     const ft=faltasEmp(e.id);
+    const nf=ft.length;
     const inj=ft.filter(f=>f.tipo==='injustificada').length;
-    const jus=ft.length-inj;
-    return`<div class="vc">
-      <div class="vc-top">
-        <div class="av av-md ${avc(i)}">${ini(e.nombre)}</div>
-        <div><div class="vc-name">${e.nombre}</div>
-        <div class="vc-sub">${inj>0?`${inj} injust.`:''} ${jus>0?`${jus} just.`:''} ${nf===0?'Sin faltas':''}</div></div>
-      </div>
-      <div class="ctr-row">
-        <span style="font-size:12px;color:var(--text2)">Total faltas</span>
-        <div class="ctr-ctrl">
-          <button class="ctr-btn" onclick="qFalta('${e.id}',-1)">−</button>
-          <span class="ctr-val ${cls}">${nf}</span>
-          <button class="ctr-btn" onclick="qFalta('${e.id}',1)">+</button>
+    const jus=ft.filter(f=>f.tipo==='justificada').length;
+    const med=ft.filter(f=>f.tipo==='medica'||f.tipo==='licencia').length;
+    const cls=nf===0?'bg':nf<=2?'ba':'br';
+    return`<tr>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="av av-sm ${avc(i)}">${ini(e.nombre)}</div>${e.nombre}</div></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="ctr-btn" onclick="qFalta('${e.id}',-1)" style="width:24px;height:24px;font-size:16px">−</button>
+          <span class="badge ${cls}" style="min-width:28px;text-align:center;font-size:13px">${nf}</span>
+          <button class="ctr-btn" onclick="qFalta('${e.id}',1)" style="width:24px;height:24px;font-size:16px">+</button>
         </div>
-      </div>
-      <div style="display:flex;justify-content:flex-end;margin-top:6px">
-        <button class="btn btn-sm" onclick="openModalFalta('${e.id}')">+ Registrar</button>
-      </div>
-    </div>`;
+      </td>
+      <td>${inj>0?`<span class="badge br">${inj}</span>`:'<span style="color:var(--text3)">—</span>'}</td>
+      <td>${jus>0?`<span class="badge bg">${jus}</span>`:'<span style="color:var(--text3)">—</span>'}</td>
+      <td>${med>0?`<span class="badge ba">${med}</span>`:'<span style="color:var(--text3)">—</span>'}</td>
+      <td><button class="btn btn-sm" onclick="openModalFalta('${e.id}')">+ Registrar</button></td>
+    </tr>`;
   }).join('');
 }
 
@@ -873,7 +935,7 @@ window.qFalta=async(empId,delta)=>{
     const last=[...faltas].filter(f=>f.empleadoId===empId).pop();
     if(last){await dbDel('faltas/'+last.id);faltas=faltas.filter(f=>f.id!==last.id);}
   }
-  rFaltasGrid();rFaltasHist();toast('Falta actualizada');
+  rFaltasTabla();rFaltasHist();toast('Falta actualizada');
 };
 
 window.openModalFalta=empId=>{
@@ -891,18 +953,164 @@ window.guardarFalta=async()=>{
   if(!empId||!fecha){toast('Completá empleado y fecha');return;}
   const r=await dbPush('faltas',{empleadoId:empId,fecha,tipo,registrador:reg,obs});
   faltas.push({id:r.key,empleadoId:empId,fecha,tipo,registrador:reg,obs});
-  closeMo('mo-falta');rFaltasGrid();rFaltasHist();toast('Falta registrada');
+  closeMo('mo-falta');rFaltasTabla();rFaltasHist();toast('Falta registrada');
 };
 window.delFalta=async id=>{
   await dbDel('faltas/'+id);faltas=faltas.filter(f=>f.id!==id);
-  rFaltasGrid();rFaltasHist();toast('Falta eliminada');
+  rFaltasTabla();rFaltasHist();toast('Falta eliminada');
 };
 
 // ── HORAS ───────────────────────────────────────────
 function pgHoras(el){
-  el.innerHTML=`<div class="page-title">Horas extra</div><div class="page-sub">Registro y aprobación</div>
-  <div class="card"><div class="empty" style="padding:3rem">Módulo de horas extra — próximamente.</div></div>`;
+  const mes=mesActual();
+  const hmes=horas.filter(h=>h.fecha&&h.fecha.startsWith(mes));
+  const totalH=hmes.reduce((a,h)=>a+(parseFloat(h.horas)||0),0);
+  const pendientes=hmes.filter(h=>h.estado==='pendiente').length;
+  const aprobadas=hmes.filter(h=>h.estado==='aprobada').length;
+
+  el.innerHTML=`
+    <div class="page-title">Horas extra</div>
+    <div class="page-sub">${new Date().toLocaleDateString('es-UY',{month:'long',year:'numeric'})}</div>
+    <div class="metrics m3">
+      <div class="mc"><div class="mc-label">Total horas</div><div class="mc-value">${totalH.toFixed(1)}h</div><div class="mc-sub">este mes</div></div>
+      <div class="mc"><div class="mc-label">Pendientes</div><div class="mc-value">${pendientes}</div><div class="mc-sub">esperando aprobación</div></div>
+      <div class="mc"><div class="mc-label">Aprobadas</div><div class="mc-value">${aprobadas}</div><div class="mc-sub">confirmadas</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">Resumen por empleado</span>
+        <button class="btn btn-a btn-sm" onclick="openModalHora(null)">+ Registrar</button>
+      </div>
+      <div id="horas-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:4px"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">Historial</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="hfilt-emp" style="width:auto;font-size:11px;padding:4px 8px" onchange="rHorasHist()">
+            <option value="">Todos</option>
+            ${empleados.map(e=>`<option value="${e.id}">${e.nombre}</option>`).join('')}
+          </select>
+          <select id="hfilt-est" style="width:auto;font-size:11px;padding:4px 8px" onchange="rHorasHist()">
+            <option value="">Todos los estados</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="aprobada">Aprobadas</option>
+            <option value="rechazada">Rechazadas</option>
+          </select>
+          ${CU.role==='rrhh'&&pendientes>0?`<button class="btn btn-a btn-sm" onclick="aprobarTodas()">Aprobar todas</button>`:''}
+        </div>
+      </div>
+      <div id="horas-hist"></div>
+    </div>`;
+  rHorasGrid();
+  rHorasHist();
 }
+
+function rHorasGrid(){
+  const g=document.getElementById('horas-grid');if(!g)return;
+  const mes=mesActual();
+  if(empleados.length===0){g.innerHTML='<div class="empty">No hay empleados registrados.</div>';return;}
+  const empConHoras=empleados.filter(e=>horas.some(h=>h.empleadoId===e.id&&h.fecha?.startsWith(mes)));
+  if(empConHoras.length===0){g.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0">Sin horas extra registradas este mes.</div>';return;}
+  g.innerHTML=empConHoras.map((e,idx)=>{
+    const i=empleados.indexOf(e);
+    const hEmp=horas.filter(h=>h.empleadoId===e.id&&h.fecha?.startsWith(mes));
+    const total=hEmp.reduce((a,h)=>a+(parseFloat(h.horas)||0),0);
+    const pend=hEmp.filter(h=>h.estado==='pendiente').length;
+    const apro=hEmp.filter(h=>h.estado==='aprobada').length;
+    return`<div class="vc">
+      <div class="vc-top">
+        <div class="av av-md ${avc(i)}">${ini(e.nombre)}</div>
+        <div>
+          <div class="vc-name">${e.nombre}</div>
+          <div class="vc-sub">${total.toFixed(1)}h totales · ${pend>0?`<span style="color:var(--amber)">${pend} pend.</span>`:''}${apro>0?` ${apro} apro.`:''}</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:6px">
+        <button class="btn btn-sm" onclick="openModalHora('${e.id}')">+ Agregar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function rHorasHist(){
+  const h=document.getElementById('horas-hist');if(!h)return;
+  const filtEmp=document.getElementById('hfilt-emp')?.value||'';
+  const filtEst=document.getElementById('hfilt-est')?.value||'';
+  const data=[...horas]
+    .filter(x=>(!filtEmp||x.empleadoId===filtEmp)&&(!filtEst||x.estado===filtEst))
+    .sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  if(data.length===0){h.innerHTML='<div class="empty">Sin horas extra registradas</div>';return;}
+  h.innerHTML=`<div class="tw"><table>
+    <thead><tr><th>Empleado</th><th>Fecha</th><th>Horas</th><th>Motivo</th><th>Estado</th><th>Aprobado por</th><th></th></tr></thead>
+    <tbody>${data.map(x=>{
+      const e=empleados.find(emp=>emp.id===x.empleadoId),i=empleados.indexOf(e);
+      const esCand=CU.role==='rrhh'||CU.role==='supervisor';
+      return`<tr>
+        <td><div style="display:flex;align-items:center;gap:7px"><div class="av av-sm ${avc(i)}">${e?ini(e.nombre):'?'}</div>${e?.nombre||'—'}</div></td>
+        <td style="font-family:var(--mono);color:var(--text2)">${x.fecha||'—'}</td>
+        <td style="font-family:var(--mono);font-weight:500">${x.horas}h</td>
+        <td style="color:var(--text2)">${x.motivo||'—'}</td>
+        <td><span class="badge ${x.estado==='aprobada'?'bg':x.estado==='rechazada'?'br':'ba'}">${x.estado||'pendiente'}</span></td>
+        <td style="color:var(--text2)">${x.aprobadoPor||'—'}</td>
+        <td style="display:flex;gap:5px">
+          ${CU.role==='rrhh'&&x.estado==='pendiente'?`
+            <button class="btn btn-sm" style="color:var(--green);border-color:var(--green)" onclick="cambiarEstadoHora('${x.id}','aprobada')">✓</button>
+            <button class="btn btn-sm btn-d" onclick="cambiarEstadoHora('${x.id}','rechazada')">✕</button>`:
+          x.estado==='pendiente'?`<button class="btn btn-sm btn-d" onclick="eliminarHora('${x.id}')">×</button>`:'—'}
+        </td>
+      </tr>`;}).join('')}
+    </tbody>
+  </table></div>`;
+}
+
+window.cambiarEstadoHora=async(id,estado)=>{
+  const h=horas.find(x=>x.id===id);if(!h)return;
+  const updated={...h,estado,aprobadoPor:CU.name};
+  await dbSet('horas/'+id,{empleadoId:updated.empleadoId,fecha:updated.fecha,horas:updated.horas,motivo:updated.motivo,estado,aprobadoPor:CU.name});
+  const idx=horas.findIndex(x=>x.id===id);
+  if(idx>=0)horas[idx]=updated;
+  rHorasGrid();rHorasHist();
+  toast(estado==='aprobada'?'Horas aprobadas':'Horas rechazadas');
+};
+
+window.aprobarTodas=async()=>{
+  const mes=mesActual();
+  const pend=horas.filter(h=>h.estado==='pendiente'&&h.fecha?.startsWith(mes));
+  for(const h of pend) await window.cambiarEstadoHora(h.id,'aprobada');
+  toast(`${pend.length} registros aprobados`);
+};
+
+window.eliminarHora=async id=>{
+  await dbDel('horas/'+id);
+  horas=horas.filter(h=>h.id!==id);
+  rHorasGrid();rHorasHist();toast('Registro eliminado');
+};
+
+window.openModalHora=empId=>{ editHoraId=null; openMoHora(empId); };
+window.editHoraId=null;
+
+function openMoHora(empId){
+  document.getElementById('mh-fecha').value=today();
+  document.getElementById('mh-horas').value='';
+  document.getElementById('mh-motivo').value='';
+  document.getElementById('mh-emp').innerHTML=`<option value="">Seleccionar...</option>`+empleados.map(e=>`<option value="${e.id}"${e.id===empId?' selected':''}>${e.nombre}</option>`).join('');
+  openMo('mo-hora');
+}
+
+window.guardarHora=async()=>{
+  const empId=document.getElementById('mh-emp').value;
+  const fecha=document.getElementById('mh-fecha').value;
+  const hrs=document.getElementById('mh-horas').value;
+  const motivo=document.getElementById('mh-motivo').value.trim();
+  if(!empId||!fecha||!hrs){toast('Completá empleado, fecha y horas');return;}
+  const data={empleadoId:empId,fecha,horas:parseFloat(hrs),motivo,estado:'pendiente',aprobadoPor:'',registradoPor:CU.name};
+  const r=await dbPush('horas',data);
+  horas.push({id:r.key,...data});
+  closeMo('mo-hora');
+  rHorasGrid();rHorasHist();
+  toast('Horas registradas — pendiente de aprobación');
+};
 
 // ── LEGAJOS ─────────────────────────────────────────
 function pgLegajos(el){
@@ -911,11 +1119,11 @@ function pgLegajos(el){
     <div class="card">
       <div class="card-hdr"><span class="card-title">Empleados (${empleados.length})</span><button class="btn btn-a btn-sm" onclick="openModalEmp()">+ Nuevo</button></div>
       ${empleados.length===0?'<div class="empty">No hay empleados. Agregá el primero.</div>':
-      `<div class="tw"><table><thead><tr><th>Nombre</th><th>Cédula</th><th>Rol</th><th>Ingreso</th><th>Contrato</th><th>Estado</th><th></th></tr></thead>
+      `<div class="tw"><table><thead><tr><th>Nombre</th><th>Cédula</th><th>Cargo</th><th>Ingreso</th><th>Contrato</th><th>Estado</th><th></th></tr></thead>
       <tbody>${empleados.map((e,i)=>`<tr>
         <td><div style="display:flex;align-items:center;gap:8px"><div class="av av-sm ${avc(i)}">${ini(e.nombre)}</div>${e.nombre}</div></td>
         <td style="font-family:var(--mono);color:var(--text2)">${e.cedula||'—'}</td>
-        <td style="color:var(--text2)">${e.rol||'vendedor'}</td>
+        <td style="color:var(--text2)">${e?.cargo||e?.rol||'vendedor'}</td>
         <td style="font-family:var(--mono);color:var(--text2)">${e.ingreso||'—'}</td>
         <td style="color:var(--text2)">${e.contrato||'indefinido'}</td>
         <td><span class="badge ${!e.estado||e.estado==='activo'?'bg':e.estado==='licencia'?'ba':'br'}">${e.estado||'activo'}</span></td>
@@ -934,16 +1142,19 @@ window.openModalEmp=id=>{
   const e=id?empleados.find(x=>x.id===id):null;
   document.getElementById('me-nombre').value=e?.nombre||'';
   document.getElementById('me-cedula').value=e?.cedula||'';
-  document.getElementById('me-rol').value=e?.rol||'vendedor';
+  document.getElementById('me-rol').value=e?.cargo||e?.rol||'vendedor';
   document.getElementById('me-ingreso').value=e?.ingreso||today();
   document.getElementById('me-contrato').value=e?.contrato||'indefinido';
   document.getElementById('me-estado').value=e?.estado||'activo';
+  document.getElementById('me-tel').value=e?.tel||'';
+  document.getElementById('me-dir').value=e?.dir||'';
+  document.getElementById('me-emerg').value=e?.emergencia||'';
   openMo('mo-emp');
 };
 window.guardarEmp=async()=>{
   const nombre=document.getElementById('me-nombre').value.trim();
   if(!nombre){toast('El nombre es obligatorio');return;}
-  const data={nombre,cedula:document.getElementById('me-cedula').value.trim(),rol:document.getElementById('me-rol').value,ingreso:document.getElementById('me-ingreso').value,contrato:document.getElementById('me-contrato').value,estado:document.getElementById('me-estado').value};
+  const data={nombre,cedula:document.getElementById('me-cedula').value.trim(),cargo:document.getElementById('me-rol').value,ingreso:document.getElementById('me-ingreso').value,contrato:document.getElementById('me-contrato').value,estado:document.getElementById('me-estado').value,tel:document.getElementById('me-tel').value.trim(),dir:document.getElementById('me-dir').value.trim(),emergencia:document.getElementById('me-emerg').value.trim()};
   if(editEmpId){
     await dbSet('empleados/'+editEmpId,data);
     const idx=empleados.findIndex(e=>e.id===editEmpId);
@@ -977,13 +1188,16 @@ function pgConfig(el){
         <button class="btn btn-sm" style="margin-top:8px" onclick="nav('simulador')">Ver en simulador</button>
       </div>
     </div>
-    <div class="card">
+    <div class="card" style="margin-top:14px">
       <div class="card-hdr">
         <div>
           <div class="card-title">Personal del sistema</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px">Cargá el listado base de empleados. No sobreescribe los existentes.</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">Cargá el listado base o actualizá los cargos del personal existente.</div>
         </div>
-        <button class="btn btn-a btn-sm" onclick="seedEmpleados()">Cargar listado base</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm" onclick="actualizarCargos()">Actualizar cargos</button>
+          <button class="btn btn-a btn-sm" onclick="seedEmpleados()">Cargar listado base</button>
+        </div>
       </div>
       <div id="seed-res"></div>
     </div>`;
@@ -993,7 +1207,7 @@ function pgConfig(el){
 async function rUsersList(){
   const ul=document.getElementById('users-list');if(!ul)return;
   const u=await dbGet('users')||{};
-  ul.innerHTML=`<div class="tw"><table><thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th></th></tr></thead>
+  ul.innerHTML=`<div class="tw"><table><thead><tr><th>Usuario</th><th>Nombre</th><th>Cargo</th><th></th></tr></thead>
   <tbody>${Object.entries(u).map(([u,v])=>`<tr>
     <td style="font-family:var(--mono)">${u}</td><td>${v.name}</td>
     <td><span class="badge ${v.role==='supervisor'?'bv':'bi'}">${v.role}</span></td>
@@ -1009,14 +1223,34 @@ window.seedEmpleados=async()=>{
     const nombre=e.nombre;
     const yaExiste=empleados.some(x=>matchNombre(x.nombre,nombre));
     if(yaExiste){omitidos++;continue;}
-    const r=await dbPush('empleados',{nombre,cedula:e.cedula,rol:'vendedor',contrato:'indefinido',estado:'activo',ingreso:''});
-    empleados.push({id:r.key,nombre,cedula:e.cedula,rol:'vendedor',contrato:'indefinido',estado:'activo',ingreso:''});
+    const r=await dbPush('empleados',{nombre,cedula:e.cedula,cargo:e.cargo,contrato:'indefinido',estado:'activo',ingreso:''});
+    empleados.push({id:r.key,nombre,cedula:e.cedula,cargo:e.cargo,contrato:'indefinido',estado:'activo',ingreso:''});
     agregados++;
   }
   if(btn){btn.textContent='Cargar listado base';btn.disabled=false;}
   const res=document.getElementById('seed-res');
   if(res) res.innerHTML=`<div class="cbox cg" style="margin-top:10px"><div class="cbox-title">Completado</div><div class="cbox-desc">${agregados} empleados agregados · ${omitidos} ya existían</div></div>`;
   toast(`${agregados} empleados cargados`);
+};
+
+window.actualizarCargos=async()=>{
+  const btn=document.querySelector('[onclick="actualizarCargos()"]');
+  if(btn){btn.textContent='Actualizando...';btn.disabled=true;}
+  let actualizados=0;
+  for(const seed of EMPLEADOS_SEED){
+    const emp=empleados.find(e=>matchNombre(e.nombre,seed.nombre)||e.cedula===seed.cedula);
+    if(emp&&(emp.cargo!==seed.cargo||emp.cedula!==seed.cedula)){
+      const updated={...emp,cargo:seed.cargo,cedula:seed.cedula};
+      await dbSet('empleados/'+emp.id,{nombre:updated.nombre,cedula:updated.cedula,cargo:updated.cargo,ingreso:updated.ingreso||'',contrato:updated.contrato||'indefinido',estado:updated.estado||'activo',tel:updated.tel||'',dir:updated.dir||'',emergencia:updated.emergencia||''});
+      const idx=empleados.findIndex(e=>e.id===emp.id);
+      if(idx>=0) empleados[idx]=updated;
+      actualizados++;
+    }
+  }
+  if(btn){btn.textContent='Actualizar cargos';btn.disabled=false;}
+  const res=document.getElementById('seed-res');
+  if(res) res.innerHTML=`<div class="cbox cg" style="margin-top:10px"><div class="cbox-title">Completado</div><div class="cbox-desc">${actualizados} empleados actualizados</div></div>`;
+  toast(`${actualizados} cargos actualizados`);
 };
 
 window.nuevoUsuario=async()=>{
@@ -1147,6 +1381,7 @@ window.openMo=id=>document.getElementById(id).classList.add('visible');
 window.closeMo=id=>document.getElementById(id).classList.remove('visible');
 document.getElementById('mo-falta').addEventListener('click',e=>{if(e.target===e.currentTarget)closeMo('mo-falta');});
 document.getElementById('mo-emp').addEventListener('click',e=>{if(e.target===e.currentTarget)closeMo('mo-emp');});
+document.getElementById('mo-hora').addEventListener('click',e=>{if(e.target===e.currentTarget)closeMo('mo-hora');});
 
 // ── TOAST ────────────────────────────────────────────
 function toast(msg){
