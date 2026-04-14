@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0f11;--bg2:#17171a;--bg3:#1e1e22;--bg4:#26262c;
+  --border:#2a2a32;--border2:#38383f;
+  --text:#eeeef2;--text2:#8888a0;--text3:#4a4a60;
+  --accent:#6c63ff;--accent2:#9d97ff;--accent-bg:rgba(108,99,255,0.1);
+  --green:#3ecf8e;--green-bg:rgba(62,207,142,0.08);
+  --amber:#f59e0b;--amber-bg:rgba(245,158,11,0.08);
+  --red:#f87171;--red-bg:rgba(248,113,113,0.08);
+  --blue:#60a5fa;--blue-bg:rgba(96,165,250,0.08);
+  --r:10px;--rl:14px;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-box{width:340px;padding:2.5rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl)}
+.login-logo{text-align:center;margin-bottom:2rem}
+.logo-mark{width:48px;height:48px;border-radius:14px;background:var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;margin-bottom:12px}
+.login-logo h1{font-size:17px;font-weight:600}
+.login-logo p{font-size:12px;color:var(--text2);margin-top:3px}
+.fgroup{margin-bottom:13px}
+.fgroup label{display:block;font-size:11px;color:var(--text2);margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em}
+.fgroup input{width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:13px;font-family:var(--font);transition:border-color 0.15s}
+.fgroup input:focus{outline:none;border-color:var(--accent)}
+.btn-login{width:100%;padding:10px;background:var(--accent);border:none;border-radius:var(--r);color:#fff;font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;margin-top:4px;transition:opacity 0.15s}
+.btn-login:hover{opacity:0.85}
+.login-err{font-size:12px;color:var(--red);text-align:center;margin-top:10px;min-height:16px}
+
+/* APP */
+#app-screen{display:none;min-height:100vh;flex-direction:column}
+.topbar{height:52px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:14px;flex-shrink:0;position:sticky;top:0;z-index:100}
+.topbar-logo{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.topbar-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.topbar-spacer{flex:1}
+.role-pill{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;background:var(--accent-bg);color:var(--accent2)}
+.user-av{width:28px;height:28px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--accent2);border:1px solid var(--border2)}
+.btn-logout{padding:5px 12px;background:transparent;border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-size:12px;cursor:pointer;font-family:var(--font);transition:all 0.15s}
+.btn-logout:hover{color:var(--text);border-color:var(--border2)}
+.layout{display:flex;flex:1;min-height:calc(100vh - 52px)}
+
+/* SIDEBAR */
+.sidebar{width:196px;background:var(--bg2);border-right:1px solid var(--border);padding:14px 10px;flex-shrink:0}
+.sidebar-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;padding:8px 10px 4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--r);color:var(--text2);font-size:13px;background:transparent;border:none;width:100%;text-align:left;cursor:pointer;transition:all 0.12s;font-family:var(--font)}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--accent-bg);color:var(--accent2);font-weight:500}
+.nav-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* CONTENT */
+.content{flex:1;padding:24px;overflow-y:auto;background:var(--bg)}
+.page{display:none}.page.visible{display:block}
+.page-title{font-size:20px;font-weight:600;margin-bottom:3px}
+.page-sub{font-size:12px;color:var(--text2);margin-bottom:20px}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:16px 20px;margin-bottom:14px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:600}
+
+/* METRICS */
+.metrics{display:grid;gap:10px;margin-bottom:16px}
+.m4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.m3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.m2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.mc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px}
+.mc-label{font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500}
+.mc-value{font-size:22px;font-weight:600;font-family:var(--mono)}
+.mc-sub{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* TABLE */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:7px 10px;color:var(--text2);font-weight:500;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text)}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--bg3)}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.bg{background:var(--green-bg);color:var(--green)}
+.ba{background:var(--amber-bg);color:var(--amber)}
+.br{background:var(--red-bg);color:var(--red)}
+.bi{background:var(--blue-bg);color:var(--blue)}
+.bv{background:var(--accent-bg);color:var(--accent2)}
+
+/* AVATAR */
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0}
+.av-sm{width:26px;height:26px;font-size:10px}
+.av-md{width:36px;height:36px;font-size:13px}
+.c1{background:#1e2a3a;color:var(--blue)}
+.c2{background:#1a2a1e;color:var(--green)}
+.c3{background:#261e2a;color:#c084fc}
+.c4{background:#2a2218;color:var(--amber)}
+.c5{background:#2a1e1e;color:var(--red)}
+
+/* BUTTONS */
+.btn{padding:6px 14px;border-radius:var(--r);font-size:12px;font-weight:500;font-family:var(--font);border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all 0.12s}
+.btn:hover{background:var(--bg3);color:var(--text);border-color:var(--border2)}
+.btn-a{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-a:hover{opacity:0.85;color:#fff}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-d{border-color:transparent;color:var(--red)}
+.btn-d:hover{background:var(--red-bg);border-color:transparent}
+
+/* FORM */
+.fg{display:grid;gap:10px;margin-bottom:14px}
+.fg2{grid-template-columns:1fr 1fr}
+.ff{display:flex;flex-direction:column;gap:5px}
+.fl{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:0.04em}
+input,select,textarea{width:100%;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:13px;font-family:var(--font);transition:border-color 0.15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+select option{background:var(--bg3)}
+textarea{resize:vertical;min-height:64px}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+
+/* COUNTER */
+.ctr-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0}
+.ctr-ctrl{display:flex;align-items:center;gap:10px}
+.ctr-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.12s;font-weight:300;font-family:var(--font)}
+.ctr-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ctr-val{font-size:18px;font-weight:600;min-width:28px;text-align:center;font-family:var(--mono)}
+.cv-ok{color:var(--green)}.cv-warn{color:var(--amber)}.cv-danger{color:var(--red)}
+
+/* PROGRESS */
+.pb-wrap{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-top:3px}
+.pb{height:100%;border-radius:2px;background:var(--accent)}
+
+/* MODAL */
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:200;align-items:center;justify-content:center}
+.mo.visible{display:flex}
+.mo-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:24px;width:460px;max-width:94vw}
+.mo-title{font-size:15px;font-weight:600;margin-bottom:18px}
+
+/* COND */
+.cbox{border-radius:var(--r);padding:10px 14px;margin-bottom:8px;font-size:12px;border:1px solid transparent}
+.cg{background:var(--green-bg);border-color:rgba(62,207,142,0.15);color:var(--green)}
+.ca{background:var(--amber-bg);border-color:rgba(245,158,11,0.15);color:var(--amber)}
+.cr{background:var(--red-bg);border-color:rgba(248,113,113,0.15);color:var(--red)}
+.cbox-title{font-weight:600;margin-bottom:2px}
+.cbox-desc{font-size:11px;opacity:0.8}
+.acond{border-radius:var(--r);padding:10px 14px;font-size:13px;font-weight:500;margin-bottom:14px;border:1px solid}
+.acg{background:var(--green-bg);border-color:rgba(62,207,142,0.25);color:var(--green)}
+.aca{background:var(--amber-bg);border-color:rgba(245,158,11,0.25);color:var(--amber)}
+.acr{background:var(--red-bg);border-color:rgba(248,113,113,0.25);color:var(--red)}
+
+/* RESULT */
+.rbox{background:var(--bg3);border-radius:var(--r);padding:14px}
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;gap:8px}
+.rrow:last-child{border-bottom:none}
+.rtotal{display:flex;justify-content:space-between;align-items:center;padding:10px 0 0;font-size:15px;font-weight:600;border-top:1px solid var(--border2);margin-top:4px}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border)}
+.tab{padding:7px 14px;background:transparent;border:none;color:var(--text2);font-size:13px;font-family:var(--font);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.12s;font-weight:500}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent2);border-bottom-color:var(--accent)}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+
+/* VEND CARD */
+.vc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px}
+.vc-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.vc-name{font-size:13px;font-weight:500}
+.vc-sub{font-size:11px;color:var(--text2)}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px}
+
+/* PLAN GRID */
+.pgrid{display:grid;grid-template-columns:1fr 60px 60px;gap:6px;align-items:center;margin-bottom:4px}
+
+/* SUMMARY */
+.sbox{background:var(--bg3);border-radius:var(--r);padding:10px 14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0}
+.si{display:flex;flex-direction:column;gap:2px}
+.sv{font-size:14px;font-weight:600;font-family:var(--mono)}
+.sl{font-size:10px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:0.04em}
+
+/* UPLOAD */
+.upzone{border:1px dashed var(--border2);border-radius:var(--rl);padding:2rem;text-align:center;cursor:pointer;transition:all 0.15s}
+.upzone:hover{border-color:var(--accent);background:var(--accent-bg)}
+.up-icon{font-size:28px;margin-bottom:8px;opacity:0.4}
+.up-label{font-size:13px;color:var(--text2);font-weight:500}
+.up-sub{font-size:11px;color:var(--text3);margin-top:4px}
+
+.empty{text-align:center;padding:2rem;color:var(--text3);font-size:13px}
+.slabel{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px}
+.no{color:var(--text3)}
+#loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;font-size:13px;color:var(--text2)}
+#toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:10px 16px;font-size:12px;z-index:999;opacity:0;transform:translateY(8px);transition:all 0.2s;pointer-events:none}
+#toast.show{opacity:1;transform:translateY(0)}
+@media(max-width:700px){.sidebar{display:none}.m4{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.fg2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="loading">Iniciando...</div>
+<div id="toast"></div>
+
+<div id="login-screen" style="display:none">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-mark">P</div>
+      <h1>Personal App</h1>
+      <p>Gestión de equipo y comisiones</p>
+    </div>
+    <div class="fgroup"><label>Usuario</label><input type="text" id="li-user" placeholder="usuario" autocomplete="username"></div>
+    <div class="fgroup"><label>Contraseña</label><input type="password" id="li-pass" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="btn-login" onclick="doLogin()">Ingresar</button>
+    <div class="login-err" id="li-err"></div>
+  </div>
+</div>
+
+<div id="app-screen">
+  <div class="topbar">
+    <div class="topbar-logo"><div class="topbar-dot"></div>Personal App</div>
+    <div class="topbar-spacer"></div>
+    <span class="role-pill" id="top-role"></span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="user-av" id="top-av"></div>
+      <span style="font-size:12px;color:var(--text2)" id="top-name"></span>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">Salir</button>
+  </div>
+  <div class="layout">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="content" id="content">
+      <div class="page" id="pg-dashboard"></div>
+      <div class="page" id="pg-equipo"></div>
+      <div class="page" id="pg-ventas"></div>
+      <div class="page" id="pg-comisiones"></div>
+      <div class="page" id="pg-simulador"></div>
+      <div class="page" id="pg-faltas"></div>
+      <div class="page" id="pg-horas"></div>
+      <div class="page" id="pg-legajos"></div>
+      <div class="page" id="pg-config"></div>
+      <div class="page" id="pg-rrhh"></div>
+      <div class="page" id="pg-personal"></div>
+      <div class="page" id="pg-asistencia"></div>
+      <div class="page" id="pg-importar"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HORA -->
+<div class="mo" id="mo-hora">
+  <div class="mo-box">
+    <div class="mo-title">Registrar horas extra</div>
+    <div class="fg fg2">
+      <div class="ff" style="grid-column:1/-1"><span class="fl">Empleado</span><select id="mh-emp"></select></div>
+      <div class="ff"><span class="fl">Fecha</span><input type="date" id="mh-fecha"></div>
+      <div class="ff"><span class="fl">Cantidad de horas</span><input type="number" id="mh-horas" min="0.5" step="0.5" placeholder="ej: 2"></div>
+    </div>
+    <div class="ff" style="margin-bottom:16px"><span class="fl">Motivo</span><textarea id="mh-motivo" placeholder="ej: Cierre de campaña, cobertura turno..."></textarea></div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:14px">Las horas quedan como pendientes hasta que RRHH las apruebe.</div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeMo('mo-hora')">Cancelar</button>
+      <button class="btn btn-a" onclick="guardarHora()">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FALTA -->
+<div class="mo" id="mo-falta">
+  <div class="mo-box">
+    <div class="mo-title">Registrar falta</div>
+    <div class="fg fg2">
+      <div class="ff"><span class="fl">Empleado</span><select id="mf-emp"></select></div>
+      <div class="ff"><span class="fl">Fecha</span><input type="date" id="mf-fecha"></div>
+      <div class="ff"><span class="fl">Tipo</span>
+        <select id="mf-tipo">
+          <option value="injustificada">Injustificada</option>
+          <option value="justificada">Justificada</option>
+          <option value="medica">Médica</option>
+          <option value="licencia">Licencia</option>
+        </select>
+      </div>
+      <div class="ff"><span class="fl">Registrado por</span>
+        <select id="mf-reg"><option value="supervisor">Supervisor</option><option value="rrhh">RRHH</option></select>
+      </div>
+    </div>
+    <div class="ff" style="margin-bottom:16px"><span class="fl">Observación</span><textarea id="mf-obs" placeholder="opcional..."></textarea></div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeMo('mo-falta')">Cancelar</button>
+      <button class="btn btn-a" onclick="guardarFalta()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EMPLEADO -->
+<div class="mo" id="mo-emp">
+  <div class="mo-box">
+    <div class="mo-title" id="mo-emp-title">Nuevo empleado</div>
+    <div class="fg fg2">
+      <div class="ff" style="grid-column:1/-1"><span class="fl">Nombre completo</span><input type="text" id="me-nombre"></div>
+      <div class="ff"><span class="fl">Cédula</span><input type="text" id="me-cedula" placeholder="ej: 5728223-5"></div>
+      <div class="ff"><span class="fl">Cargo</span><select id="me-rol"><option value="vendedor">Vendedor</option><option value="atc">Atc</option><option value="back">Back</option><option value="supervisor">Supervisor</option><option value="limpieza">Limpieza</option></select></div>
+      <div class="ff"><span class="fl">Fecha de ingreso</span><input type="date" id="me-ingreso"></div>
+      <div class="ff"><span class="fl">Contrato</span><select id="me-contrato"><option value="indefinido">Indefinido</option><option value="temporal">Temporal</option><option value="pasante">Pasante</option></select></div>
+      <div class="ff"><span class="fl">Estado</span><select id="me-estado"><option value="activo">Activo</option><option value="inactivo">Inactivo</option><option value="licencia">En licencia</option></select></div>
+      <div class="ff"><span class="fl">Teléfono</span><input type="text" id="me-tel" placeholder="ej: 099123456"></div>
+      <div class="ff"><span class="fl">Dirección</span><input type="text" id="me-dir" placeholder="ej: Av. 18 de julio 1234"></div>
+      <div class="ff" style="grid-column:1/-1"><span class="fl">Contacto de emergencia</span><input type="text" id="me-emerg" placeholder="ej: María López (madre) 099456789"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeMo('mo-emp')">Cancelar</button>
+      <button class="btn btn-a" onclick="guardarEmp()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getDatabase,ref,set,get,push,remove}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const FC={"apiKey":"AIzaSyD68l1WtIW5Eem315V07jZvES6ynWnImwE","authDomain":"app-para-personal.firebaseapp.com","projectId":"app-para-personal","storageBucket":"app-para-personal.firebasestorage.app","messagingSenderId":"45821787649","appId":"1:45821787649:web:6973e6e81e79617fdcca00","databaseURL":"https://app-para-personal-default-rtdb.firebaseio.com"};
+const app=initializeApp(FC);
+const db=getDatabase(app);
+
+// STATE
+let CU=null,empleados=[],faltas=[],ventas=[],horas=[],curPage='';
+const AVC=['c1','c2','c3','c4','c5'];
+const ini=n=>n.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const avc=i=>AVC[i%AVC.length];
+const fmt$=v=>'$'+Number(v).toLocaleString('es-UY',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtN=v=>v===null?null:'$'+Number(v).toFixed(2);
+const today=()=>new Date().toISOString().split('T')[0];
+const mesActual=()=>new Date().toISOString().slice(0,7);
+
+// COMISIONES
+const PF=[
+  {k:'bas',p:'Fibra básico',a8:102,a5:45,r8:[34,44.2,51],r5:[22.5,29.25,33.75]},
+  {k:'plu',p:'Fibra plus',a8:135,a5:60,r8:[45,58.5,67.5],r5:[30,39,45]},
+  {k:'ent',p:'Fibra entretenimiento',a8:158,a5:69,r8:[null,null,null],r5:[null,null,null]},
+  {k:'dg1',p:'Fibra DGO 1',a8:164,a5:71,r8:[null,null,null],r5:[null,null,null]},
+  {k:'pep',p:'Fibra entret. premium',a8:174,a5:77,r8:[75.4,75.4,87],r5:[50.05,50.05,57.75]},
+  {k:'nfx',p:'Fibra entret. Netflix',a8:229.5,a5:80.7,r8:[null,null,null],r5:[null,null,null]},
+  {k:'dg2',p:'Fibra DGO 2',a8:186,a5:81,r8:[null,null,null],r5:[null,null,null]},
+  {k:'prm',p:'Fibra premium',a8:188,a5:83,r8:[93.75,93.75,93.75],r5:[62.25,62.25,62.25]},
+  {k:'sup',p:'Fibra super entret.',a8:230,a5:102,r8:[153,153,153],r5:[102,102,102]},
+  {k:'ult',p:'Ultra',a8:291,a5:129,r8:[194,194,194],r5:[129,129,129]},
+  {k:'lm1',p:'Fibra con límite 1',a8:40.5,a5:18,r8:[null,null,null],r5:[null,null,null]},
+  {k:'lm2',p:'Fibra con límite 2',a8:73.5,a5:32,r8:[null,null,null],r5:[null,null,null]},
+];
+const PM=[
+  {k:'i1',p:'Inicial 1 40gb',c6:100,c9:150},
+  {k:'b1',p:'Básico 1 70gb',c6:100,c9:150},
+  {k:'b2',p:'Básico 2 90gb',c6:250,c9:250},
+  {k:'p1',p:'Plus 1 cl 130gb',c6:300,c9:300},
+  {k:'p2',p:'Plus 2 cl 160gb',c6:350,c9:350},
+  {k:'p3',p:'Plus 3 cl 180gb',c6:400,c9:400},
+  {k:'pr',p:'Premium 2 cl 210gb',c6:450,c9:450},
+  {k:'el',p:'Entret. con límite',c6:500,c9:500},
+  {k:'en',p:'Entret. Netflix',c6:600,c9:600},
+  {k:'ep',p:'Entret. plus',c6:700,c9:700},
+];
+
+// DB HELPERS
+const dbGet=async p=>{const s=await get(ref(db,p));return s.exists()?s.val():null};
+const dbSet=async(p,v)=>set(ref(db,p),v);
+const dbPush=async(p,v)=>push(ref(db,p),v);
+const dbDel=async p=>remove(ref(db,p));
+
+// NORMALIZACIÓN DE NOMBRES
+function normNombre(n){
+  if(!n) return '';
+  return n.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase().replace(/\s+/g,' ').trim()
+    .split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+}
+// Compara dos nombres ignorando tildes, mayúsculas y espacios extras
+function matchNombre(a,b){
+  const clean=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+  return clean(a)===clean(b);
+}
+
+const EMPLEADOS_SEED=[
+  // FIBRA
+  {cedula:'5597754-1', nombre:'Lusmila Camila Lanusse Alvarez', cargo:'vendedor'},
+  {cedula:'5263563-3', nombre:'Alison Lucia Redon Cordero', cargo:'vendedor'},
+  {cedula:'5259794-4', nombre:'Camila Belen De Los Santos Alvarez', cargo:'vendedor'},
+  {cedula:'5527154-3', nombre:'Cecilia Antonella Albornoz Silva', cargo:'vendedor'},
+  {cedula:'5229704-5', nombre:'Camila Loriana Perdomo Ferreira', cargo:'vendedor'},
+  {cedula:'5492005-8', nombre:'Oriana Yanaina Silva Rodriguez', cargo:'vendedor'},
+  {cedula:'5659035-4', nombre:'Mariangeles Victoria Guerra Sellanes', cargo:'vendedor'},
+  {cedula:'5597198-9', nombre:'Eugenia Zapatta Vazquez', cargo:'vendedor'},
+  {cedula:'5544501-1', nombre:'Abril Agustina Gonzalez Gonzalez', cargo:'vendedor'},
+  {cedula:'5747977-3', nombre:'Valentina Florencia Pintos Cardozo', cargo:'vendedor'},
+  {cedula:'5625939-6', nombre:'Shanti Acuna Martinez', cargo:'vendedor'},
+  {cedula:'5481927-5', nombre:'Ayelen Rodriguez', cargo:'vendedor'},
+  {cedula:'5174246-9', nombre:'Luna Jazmin Delgado Suarez', cargo:'vendedor'},
+  {cedula:'5617149-5', nombre:'Valentina Erika Simone Valiente', cargo:'vendedor'},
+  {cedula:'5404540-4', nombre:'Brisa Camila Silveira Perez', cargo:'vendedor'},
+  {cedula:'5449391-0', nombre:'Lucia Morales', cargo:'vendedor'},
+  {cedula:'5510444-5', nombre:'Josefina Cupparo Ramos', cargo:'vendedor'},
+  {cedula:'5321820-6', nombre:'Katherin Balestie', cargo:'vendedor'},
+  {cedula:'5438274-5', nombre:'Nahomi Micaela Coronel Alvez', cargo:'vendedor'},
+  {cedula:'5290556-1', nombre:'Barbara Gabriela Mendieta Da Silva', cargo:'vendedor'},
+  {cedula:'5203606-1', nombre:'Maira Camila Lavega Gonzalez', cargo:'vendedor'},
+  {cedula:'5239566-3', nombre:'Florencia Pajares', cargo:'vendedor'},
+  {cedula:'5728223-5', nombre:'Abigail Yemima Acosta Campos', cargo:'vendedor'},
+  {cedula:'5433139-8', nombre:'Brenda Vanina Martinez Rodriguez', cargo:'vendedor'},
+  {cedula:'5262941-0', nombre:'Georgina Tamara Nunez Calabuig', cargo:'vendedor'},
+  {cedula:'5519182-6', nombre:'Alejandra Nicol Lima Bitancourt', cargo:'vendedor'},
+  {cedula:'5465307-5', nombre:'Micaela Miranda Fedulo', cargo:'vendedor'},
+  {cedula:'5401422-9', nombre:'Facundo Daniel Priario Pereira', cargo:'vendedor'},
+  {cedula:'5302549-1', nombre:'Agustina Floren Dos Reis Castro', cargo:'vendedor'},
+  {cedula:'5544069-1', nombre:'Vanessa Fabiana Ramos Babon', cargo:'vendedor'},
+  {cedula:'5012395-3', nombre:'Juan Manuel Martinez Puig', cargo:'vendedor'},
+  {cedula:'5197897-7', nombre:'Joseline Barrios Brian', cargo:'vendedor'},
+  {cedula:'5375730-1', nombre:'Pamela Fernanda Lagues Lopez', cargo:'vendedor'},
+  {cedula:'5644755-9', nombre:'Katherine Lilian Nereitter Lima', cargo:'vendedor'},
+  {cedula:'5695140-1', nombre:'Mariana Sagasta', cargo:'vendedor'},
+  // MÓVILES
+  {cedula:'55769990',  nombre:'Delfina Garcia', cargo:'vendedor'},
+  {cedula:'4908986-3', nombre:'Fernanda Ribeiro', cargo:'vendedor'},
+  {cedula:'4988050-6', nombre:'Sofia Barrios', cargo:'vendedor'},
+  {cedula:'4446289-0', nombre:'Daniela Vallari', cargo:'vendedor'},
+  {cedula:'4717021-2', nombre:'Marcia San Martin', cargo:'vendedor'},
+  {cedula:'5165559-7', nombre:'Victoria Garro', cargo:'vendedor'},
+  {cedula:'5601882-9', nombre:'Leandro Nauar', cargo:'vendedor'},
+  {cedula:'5504507-9', nombre:'Luna Acosta', cargo:'vendedor'},
+  {cedula:'5541898-9', nombre:'Macarena Cruz', cargo:'vendedor'},
+  {cedula:'5589396-9', nombre:'Kiara Ferreira', cargo:'vendedor'},
+  {cedula:'5384373-0', nombre:'Agustina De Leon', cargo:'vendedor'},
+  {cedula:'5366700-1', nombre:'Guadriela Luna', cargo:'vendedor'},
+  {cedula:'5576286-7', nombre:'Victoria Munoz', cargo:'vendedor'},
+  {cedula:'5423199-8', nombre:'Agustina Oviedo', cargo:'vendedor'},
+  {cedula:'5479390-0', nombre:'Federica Catalano', cargo:'vendedor'},
+  {cedula:'4951843-2', nombre:'Romina Ximenez', cargo:'vendedor'},
+  {cedula:'5519805-6', nombre:'Maria De Los Angeles Cano', cargo:'vendedor'},
+  {cedula:'5603361-5', nombre:'Sol Echeverria', cargo:'vendedor'},
+  // ATC
+  {cedula:'5241863-5', nombre:'Valentina Montana Deganello', cargo:'atc'},
+  {cedula:'4876531-9', nombre:'Maria Milena Milan Nunez', cargo:'atc'},
+  {cedula:'5505527-6', nombre:'Eliana Izquierdo Vintor', cargo:'atc'},
+  {cedula:'5608916-9', nombre:'Camila Rossi', cargo:'atc'},
+  {cedula:'5190762-1', nombre:'Florencia Valentina Aldacor Larrosa', cargo:'atc'},
+  {cedula:'4862875-9', nombre:'Mikaela Rodriguez Toledo', cargo:'atc'},
+  {cedula:'5282437-3', nombre:'Jose Flores', cargo:'atc'},
+  // BACK OFFICE
+  {cedula:'5613125-5', nombre:'Alexandra Mairen Diaz Sabatar', cargo:'back'},
+  {cedula:'5603461-9', nombre:'Alison Perez', cargo:'back'},
+  {cedula:'5016480-2', nombre:'Cristian Hernandez', cargo:'back'},
+  {cedula:'6720924-3', nombre:'Lilisbet Vazquez', cargo:'back'},
+  {cedula:'5595027-4', nombre:'Enrique Dionisio', cargo:'back'},
+  // SUPERVISOR
+  {cedula:'6441884-5', nombre:'Isaac Condon', cargo:'supervisor'},
+  // LIMPIEZA
+  {cedula:'3426331-9', nombre:'Lorena Paola Gonzalez Dominguez', cargo:'limpieza'},
+];
+
+// INIT
+async function init(){
+  document.getElementById('loading').style.display='flex';
+  const u=await dbGet('users');
+  if(!u) await dbSet('users',{admin:{username:'admin',password:'admin123',role:'supervisor',name:'Administrador'},rrhh:{username:'rrhh',password:'rrhh123',role:'rrhh',name:'RRHH Admin'}});
+  // Seed empleados si no existen
+  const empExist=await dbGet('empleados');
+  if(!empExist){
+    for(const e of EMPLEADOS_SEED){
+      await dbPush('empleados',{nombre:e.nombre,cedula:e.cedula,rol:'vendedor',contrato:'indefinido',estado:'activo',ingreso:''});
+    }
+  }
+  const saved=sessionStorage.getItem('pa_u');
+  if(saved){CU=JSON.parse(saved);await loadData();showApp();}
+  else showLogin();
+  document.getElementById('loading').style.display='none';
+}
+
+function showLogin(){
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app-screen').style.display='none';
+}
+function showApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-screen').style.display='flex';
+  document.getElementById('top-role').textContent=CU.role==='supervisor'?'Supervisor':'RRHH';
+  document.getElementById('top-name').textContent=CU.name;
+  document.getElementById('top-av').textContent=ini(CU.name);
+  buildSidebar();
+  nav(CU.role==='supervisor'?'dashboard':'rrhh');
+}
+
+// AUTH
+window.doLogin=async()=>{
+  const u=document.getElementById('li-user').value.trim();
+  const p=document.getElementById('li-pass').value;
+  document.getElementById('li-err').textContent='';
+  if(!u||!p){document.getElementById('li-err').textContent='Completá usuario y contraseña.';return;}
+  const users=await dbGet('users');
+  if(users&&users[u]&&users[u].password===p){
+    CU=users[u];sessionStorage.setItem('pa_u',JSON.stringify(CU));
+    await loadData();showApp();
+  } else document.getElementById('li-err').textContent='Usuario o contraseña incorrectos.';
+};
+window.doLogout=()=>{CU=null;sessionStorage.removeItem('pa_u');showLogin();};
+document.getElementById('li-pass').addEventListener('keydown',e=>{if(e.key==='Enter')window.doLogin();});
+
+async function loadData(){
+  const[e,f,v,h]=await Promise.all([dbGet('empleados'),dbGet('faltas'),dbGet('ventas'),dbGet('horas')]);
+  empleados=e?Object.entries(e).map(([id,v])=>({id,...v})):[];
+  faltas=f?Object.entries(f).map(([id,v])=>({id,...v})):[];
+  ventas=v?Object.entries(v).map(([id,v])=>({id,...v})):[];
+  horas=h?Object.entries(h).map(([id,v])=>({id,...v})):[];
+  // Auto-actualizar cargos y agregar empleados faltantes en segundo plano
+  autoSyncPersonal();
+}
+
+async function autoSyncPersonal(){
+  for(const seed of EMPLEADOS_SEED){
+    const emp=empleados.find(e=>matchNombre(e.nombre,seed.nombre)||e.cedula===seed.cedula);
+    if(emp){
+      // Actualizar cargo y cédula si difieren
+      if(emp.cargo!==seed.cargo||emp.cedula!==seed.cedula){
+        const updated={...emp,cargo:seed.cargo,cedula:seed.cedula};
+        await dbSet('empleados/'+emp.id,{nombre:updated.nombre,cedula:updated.cedula,cargo:updated.cargo,ingreso:updated.ingreso||'',contrato:updated.contrato||'indefinido',estado:updated.estado||'activo',tel:updated.tel||'',dir:updated.dir||'',emergencia:updated.emergencia||''});
+        const idx=empleados.findIndex(e=>e.id===emp.id);
+        if(idx>=0) empleados[idx]=updated;
+      }
+    } else {
+      // Agregar si no existe
+      const r=await dbPush('empleados',{nombre:seed.nombre,cedula:seed.cedula,cargo:seed.cargo,ingreso:'',contrato:'indefinido',estado:'activo',tel:'',dir:'',emergencia:''});
+      empleados.push({id:r.key,nombre:seed.nombre,cedula:seed.cedula,cargo:seed.cargo,ingreso:'',contrato:'indefinido',estado:'activo',tel:'',dir:'',emergencia:''});
+    }
+  }
+}
+
+// NAV
+const NAVS={
+  supervisor:[
+    {s:'General',items:[{id:'dashboard',l:'Inicio',c:'#6c63ff'},{id:'equipo',l:'Equipo',c:'#3ecf8e'}]},
+    {s:'Ventas',items:[{id:'ventas',l:'Ventas',c:'#60a5fa'},{id:'comisiones',l:'Comisiones',c:'#3ecf8e'},{id:'simulador',l:'Simulador',c:'#c084fc'}]},
+    {s:'Personal',items:[{id:'faltas',l:'Faltas',c:'#f87171'},{id:'horas',l:'Horas extra',c:'#f59e0b'},{id:'legajos',l:'Legajos',c:'#9090a0'}]},
+    {s:'Sistema',items:[{id:'config',l:'Configuración',c:'#9090a0'}]},
+  ],
+  rrhh:[
+    {s:'General',items:[{id:'rrhh',l:'Inicio',c:'#f59e0b'},{id:'personal',l:'Personal',c:'#c084fc'}]},
+    {s:'Registros',items:[{id:'asistencia',l:'Asistencia',c:'#f87171'},{id:'faltas',l:'Faltas',c:'#f87171'},{id:'horas',l:'Horas extra',c:'#f59e0b'}]},
+    {s:'Datos',items:[{id:'importar',l:'Importar ventas',c:'#60a5fa'}]},
+  ]
+};
+
+function buildSidebar(){
+  const n=NAVS[CU.role]||[];
+  document.getElementById('sidebar').innerHTML=n.map(s=>`
+    <div><div class="sidebar-label">${s.s}</div>
+    ${s.items.map(i=>`<button class="nav-item${i.id===curPage?' active':''}" onclick="nav('${i.id}')">
+      <div class="nav-dot" style="background:${i.c}"></div>${i.l}
+    </button>`).join('')}</div>`).join('');
+}
+
+window.nav=function(page){
+  curPage=page;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('visible'));
+  const el=document.getElementById('pg-'+page);
+  if(el){el.classList.add('visible');renderPg(page,el);}
+  buildSidebar();
+};
+
+// RENDERS MAP
+const RD={
+  dashboard:pgDashboard,equipo:pgEquipo,ventas:pgVentas,comisiones:pgComisiones,
+  simulador:pgSimulador,faltas:pgFaltas,horas:pgHoras,legajos:pgLegajos,
+  config:pgConfig,rrhh:pgRrhh,personal:pgLegajos,asistencia:pgFaltas,importar:pgImportar
+};
+function renderPg(page,el){if(RD[page])RD[page](el);}
+
+// HELPERS
+const faltasEmp=id=>faltas.filter(f=>f.empleadoId===id);
+const cntFaltas=id=>faltasEmp(id).length;
+const mes=()=>mesActual();
+const ventasMes=()=>ventas.filter(v=>v.fecha&&v.fecha.startsWith(mes()));
+
+// ── DASHBOARD ───────────────────────────────────────
+function pgDashboard(el){
+  const tf=faltas.filter(f=>f.fecha?.startsWith(mes())).length;
+  const cf=new Set(faltas.filter(f=>f.fecha?.startsWith(mes())).map(f=>f.empleadoId)).size;
+  const hp=horas.filter(h=>h.fecha?.startsWith(mes())&&h.estado==='pendiente').length;
+  el.innerHTML=`
+    <div class="page-title">Inicio</div>
+    <div class="page-sub">${new Date().toLocaleDateString('es-UY',{month:'long',year:'numeric'})}</div>
+    <div class="metrics m4">
+      <div class="mc"><div class="mc-label">Empleados</div><div class="mc-value">${empleados.length}</div><div class="mc-sub">activos en el sistema</div></div>
+      <div class="mc"><div class="mc-label">Ventas del mes</div><div class="mc-value">${ventasMes().length}</div><div class="mc-sub">cargadas</div></div>
+      <div class="mc"><div class="mc-label">Faltas este mes</div><div class="mc-value">${tf}</div><div class="mc-sub">${cf} empleado${cf!==1?'s':''}</div></div>
+      <div class="mc"><div class="mc-label">HE pendientes</div><div class="mc-value">${hp}</div><div class="mc-sub">por aprobar</div></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Accesos rápidos</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          ${[['ventas','Ventas','#60a5fa'],['comisiones','Comisiones','#3ecf8e'],['faltas','Faltas','#f87171'],['horas','Horas extra','#f59e0b']].map(([id,l,c])=>`
+          <button class="btn" onclick="nav('${id}')" style="display:flex;align-items:center;gap:8px;padding:10px 12px;justify-content:flex-start">
+            <div style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0"></div>${l}
+          </button>`).join('')}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Últimas faltas</span></div>
+        ${faltas.slice(-5).reverse().map(f=>{
+          const e=empleados.find(x=>x.id===f.empleadoId),i=empleados.indexOf(e);
+          return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px">
+            <div class="av av-sm ${avc(i)}">${e?ini(e.nombre):'?'}</div>
+            <span style="flex:1">${e?.nombre||'—'}</span>
+            <span class="badge ${f.tipo==='injustificada'?'br':f.tipo==='justificada'?'bg':'ba'}">${f.tipo}</span>
+            <span style="color:var(--text3);font-family:var(--mono)">${f.fecha||''}</span>
+          </div>`;}).join('')||'<div class="empty">Sin faltas registradas</div>'}
+      </div>
+    </div>`;
+}
+
+// ── EQUIPO ──────────────────────────────────────────
+function pgEquipo(el){
+  el.innerHTML=`
+    <div class="page-title">Equipo</div>
+    <div class="page-sub">Resumen del mes</div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Empleados (${empleados.length})</span><button class="btn btn-a btn-sm" onclick="openModalEmp()">+ Nuevo</button></div>
+      ${empleados.length===0?'<div class="empty">No hay empleados. Agregá el primero.</div>':
+      `<div class="tw"><table><thead><tr><th>Nombre</th><th>Cédula</th><th>Cargo</th><th></th></tr></thead>
+      <tbody>${empleados.map((e,i)=>`<tr>
+        <td><div style="display:flex;align-items:center;gap:8px"><div class="av av-sm ${avc(i)}">${ini(e.nombre)}</div>${e.nombre}</div></td>
+        <td style="font-family:var(--mono);color:var(--text2)">${e.cedula||'—'}</td>
+        <td style="color:var(--text2)">${e?.cargo||e?.rol||'vendedor'}</td>
+        <td><button class="btn btn-sm" onclick="openModalEmp('${e.id}')">Editar</button></td>
+      </tr>`).join('')}
+      </tbody></table></div>`}
+    </div>`;
+}
+
+// ── VENTAS ──────────────────────────────────────────
+function pgVentas(el){
+  const vm=ventasMes();
+  const altas=vm.filter(v=>v.motivo!=='Renovacion').length;
+  const renov=vm.filter(v=>v.motivo==='Renovacion').length;
+  const porEmp={};
+  vm.forEach(v=>{
+    const empMatch=empleados.find(e=>matchNombre(e.nombre,v.vendedor));
+    const key=empMatch?empMatch.nombre:v.vendedor;
+    if(!porEmp[key])porEmp[key]={a:0,r:0,empId:empMatch?.id||null};
+    v.motivo==='Renovacion'?porEmp[key].r++:porEmp[key].a++;
+  });
+  el.innerHTML=`
+    <div class="page-title">Ventas</div>
+    <div class="page-sub">${new Date().toLocaleDateString('es-UY',{month:'long',year:'numeric'})}</div>
+    <div class="metrics m3">
+      <div class="mc"><div class="mc-label">Total</div><div class="mc-value">${vm.length}</div><div class="mc-sub">altas + renov.</div></div>
+      <div class="mc"><div class="mc-label">Altas</div><div class="mc-value">${altas}</div></div>
+      <div class="mc"><div class="mc-label">Renovaciones</div><div class="mc-value">${renov}</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Por vendedor</span><button class="btn btn-a btn-sm" onclick="nav('importar')">Importar CSV</button></div>
+      ${vm.length===0?'<div class="empty">Sin ventas. Importá un CSV para empezar.</div>':
+      `<div class="tw"><table><thead><tr><th>Vendedor</th><th>Altas</th><th>Renov.</th><th>Total</th><th>Faltas</th><th>Condición Fibra</th></tr></thead>
+      <tbody>${Object.entries(porEmp).sort((a,b)=>(b[1].a+b[1].r)-(a[1].a+a[1].r)).map(([nombre,d])=>{
+        const total=d.a+d.r;
+        const nf=d.empId?cntFaltas(d.empId):0;
+        let cond,cc;
+        if(total<50){cond='No cobra';cc='br';}
+        else if(total>=80&&nf===0){cond='Tabla 80';cc='bg';}
+        else{cond='Tabla 50';cc='ba';}
+        return`<tr><td>${nombre}</td><td>${d.a}</td><td>${d.r}</td><td style="font-weight:500;font-family:var(--mono)">${total}</td>
+          <td>${nf>0?`<span class="badge ${nf<=2?'ba':'br'}">${nf}</span>`:'<span class="badge bg">0</span>'}</td>
+          <td><span class="badge ${cc}">${cond}</span></td></tr>`;}).join('')}
+      </tbody></table></div>`}
+    </div>`;
+}
+
+// ── COMISIONES ──────────────────────────────────────
+function pgComisiones(el){
+  const vm=ventasMes();
+  const porEmp={};
+  // Inicializar con empleados del legajo incluyendo sus faltas reales
+  empleados.forEach(e=>{porEmp[e.nombre]={a:0,r:0,nf:cntFaltas(e.id),empId:e.id};});
+  vm.forEach(v=>{
+    // Buscar el empleado que matchea el nombre del vendedor (normalizando)
+    const empMatch=empleados.find(e=>matchNombre(e.nombre,v.vendedor));
+    const key=empMatch?empMatch.nombre:v.vendedor;
+    if(!porEmp[key]) porEmp[key]={a:0,r:0,nf:empMatch?cntFaltas(empMatch.id):0,empId:empMatch?.id||null};
+    v.motivo==='Renovacion'?porEmp[key].r++:porEmp[key].a++;
+  });
+  const rows=Object.entries(porEmp).filter(([,d])=>d.a+d.r>0).map(([nombre,d])=>{
+    const tv=d.a+d.r;
+    let cond;
+    if(tv<50)cond='ninguna';
+    else if(tv>=80&&d.nf===0)cond='80';
+    else cond='50';
+    const ta=cond==='80'?175:cond==='50'?78:0;
+    const tr=cond==='80'?100:cond==='50'?50:0;
+    const est=d.a*ta+d.r*tr;
+    return{nombre,tv,cond,est,nf:d.nf};
+  });
+  const totalEst=rows.reduce((a,r)=>a+r.est,0);
+  el.innerHTML=`
+    <div class="page-title">Comisiones</div>
+    <div class="page-sub">Estimación — ${new Date().toLocaleDateString('es-UY',{month:'long',year:'numeric'})}</div>
+    <div class="metrics m3">
+      <div class="mc"><div class="mc-label">Total estimado</div><div class="mc-value" style="font-size:18px">${fmt$(totalEst)}</div></div>
+      <div class="mc"><div class="mc-label">En tabla 80</div><div class="mc-value">${rows.filter(r=>r.cond==='80').length}</div><div class="mc-sub">vendedores</div></div>
+      <div class="mc"><div class="mc-label">No cobran</div><div class="mc-value">${rows.filter(r=>r.cond==='ninguna').length}</div><div class="mc-sub">debajo de 50</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Detalle por vendedor</span><button class="btn btn-sm" onclick="nav('simulador')">Simulador exacto</button></div>
+      ${rows.length===0?'<div class="empty">Sin ventas cargadas.</div>':
+      `<div class="tw"><table><thead><tr><th>Vendedor</th><th>Ventas</th><th>Faltas</th><th>Tabla</th><th>Estimación*</th><th>Estado</th></tr></thead>
+      <tbody>${rows.sort((a,b)=>b.est-a.est).map(r=>`<tr>
+        <td>${r.nombre}</td>
+        <td style="font-family:var(--mono)">${r.tv}</td>
+        <td>${r.nf>0?`<span class="badge ${r.nf<=2?'ba':'br'}">${r.nf}</span>`:'<span class="badge bg">0</span>'}</td>
+        <td><span class="badge ${r.cond==='80'?'bg':r.cond==='50'?'ba':'br'}">${r.cond==='80'?'Tabla 80':r.cond==='50'?'Tabla 50':'No cobra'}</span></td>
+        <td style="font-family:var(--mono);font-weight:500">${r.cond!=='ninguna'?fmt$(r.est):'—'}</td>
+        <td><span class="badge ba">Pendiente</span></td>
+      </tr>`).join('')}</tbody></table></div>`}
+    </div>
+    <div style="font-size:11px;color:var(--text3)">* Estimación con tasa promedio. Usá el simulador para el cálculo exacto por plan.</div>`;
+}
+
+// ── SIMULADOR ──────────────────────────────────────
+function pgSimulador(el){
+  el.innerHTML=`
+    <div class="page-title">Simulador de comisiones</div>
+    <div class="page-sub">Cálculo exacto por plan</div>
+    <div class="tabs">
+      <button class="tab active" onclick="stab('f',this)">Fibra óptica</button>
+      <button class="tab" onclick="stab('m',this)">Móvil</button>
+    </div>
+    <div id="sf">
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Datos del vendedor</span></div>
+        <div class="fg fg2">
+          <div class="ff"><span class="fl">Vendedor</span>
+            <select id="sv" onchange="sAutoFill()">
+              <option value="">Manual</option>
+              ${empleados.map(e=>`<option value="${e.nombre}">${e.nombre}</option>`).join('')}
+            </select>
+          </div>
+          <div class="ff"><span class="fl">¿Tuvo faltas?</span>
+            <select id="sf-falta" onchange="simF()"><option value="no">No</option><option value="si">Sí</option></select>
+          </div>
+        </div>
+        <div class="slabel">Altas y renovaciones por plan</div>
+        <div class="pgrid" style="margin-bottom:6px">
+          <span style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Plan</span>
+          <span style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;text-align:center">Altas</span>
+          <span style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;text-align:center">Renov.</span>
+        </div>
+        ${PF.map(p=>`<div class="pgrid">
+          <span style="font-size:12px">${p.p}</span>
+          <input type="number" class="sa" data-k="${p.k}" value="0" min="0" style="text-align:center;padding:5px" oninput="simF()">
+          <input type="number" class="sr" data-k="${p.k}" value="0" min="0" style="text-align:center;padding:5px" oninput="simF()">
+        </div>`).join('')}
+        <div class="sbox"><div class="si"><span class="sl">Altas</span><span class="sv" id="s-a">0</span></div><div class="si"><span class="sl">Renov.</span><span class="sv" id="s-r">0</span></div><div class="si"><span class="sl">Total ventas</span><span class="sv" id="s-t">0</span></div></div>
+      </div>
+      <div id="scond-f"></div>
+      <div class="card"><div class="card-hdr"><span class="card-title">Resultado</span></div><div class="rbox" id="sres-f"></div></div>
+    </div>
+    <div id="sm" style="display:none">
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Datos — Móvil</span></div>
+        <div class="fg fg2">
+          <div class="ff"><span class="fl">Ventas del mes</span><input type="number" id="mv-v" value="70" min="0" oninput="simM()"></div>
+          <div class="ff"><span class="fl">¿Tuvo faltas?</span><select id="mv-f" onchange="simM()"><option value="no">No</option><option value="si">Sí</option></select></div>
+        </div>
+      </div>
+      <div id="scond-m"></div>
+      <div class="card"><div class="card-hdr"><span class="card-title">Resultado</span></div><div class="rbox" id="sres-m"></div></div>
+    </div>`;
+  simF();simM();
+}
+
+window.stab=(t,btn)=>{
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  document.getElementById('sf').style.display=t==='f'?'block':'none';
+  document.getElementById('sm').style.display=t==='m'?'block':'none';
+};
+
+window.sAutoFill=()=>{
+  const nombre=document.getElementById('sv').value;if(!nombre)return;
+  const emp=empleados.find(e=>e.nombre===nombre);if(!emp)return;
+  document.getElementById('sf-falta').value=cntFaltas(emp.id)>0?'si':'no';
+  const vm=ventasMes().filter(v=>v.vendedor===nombre);
+  PF.forEach(p=>{
+    const ae=document.querySelector(`.sa[data-k="${p.k}"]`);
+    const re=document.querySelector(`.sr[data-k="${p.k}"]`);
+    if(ae)ae.value=0;if(re)re.value=0;
+  });
+  simF();
+};
+
+window.simF=()=>{
+  let ta=0,tr=0;
+  document.querySelectorAll('.sa').forEach(i=>ta+=parseInt(i.value)||0);
+  document.querySelectorAll('.sr').forEach(i=>tr+=parseInt(i.value)||0);
+  const tv=ta+tr;
+  const falto=document.getElementById('sf-falta')?.value==='si';
+  if(document.getElementById('s-a'))document.getElementById('s-a').textContent=ta;
+  if(document.getElementById('s-r'))document.getElementById('s-r').textContent=tr;
+  if(document.getElementById('s-t'))document.getElementById('s-t').textContent=tv;
+  let cond;
+  if(tv<50)cond='n';else if(tv>=80&&!falto)cond='80';else cond='50';
+  const ce=document.getElementById('scond-f');if(!ce)return;
+  if(cond==='n'){
+    ce.innerHTML=`<div class="acond acr">No cobra<div style="font-size:11px;opacity:0.75;margin-top:2px">${tv} ventas — mínimo 50</div></div>`;
+    document.getElementById('sres-f').innerHTML=`<div class="rtotal"><span>Total</span><span>$0.00</span></div>`;return;
+  }
+  ce.innerHTML=`<div class="acond ${cond==='80'?'acg':'aca'}">${cond==='80'?'Tabla 80 — sin faltas':'Tabla 50'}<div style="font-size:11px;opacity:0.75;margin-top:2px">${tv} ventas (${ta} altas + ${tr} renov.)${falto?', con faltas':''}</div></div>`;
+  const ti=tr<=0?-1:tr<=200?0:tr<=250?1:2;
+  let rows='',g=0;
+  PF.forEach(p=>{
+    const a=parseInt(document.querySelector(`.sa[data-k="${p.k}"]`)?.value)||0;
+    const r=parseInt(document.querySelector(`.sr[data-k="${p.k}"]`)?.value)||0;
+    if(a===0&&r===0)return;
+    const tsa=cond==='80'?p.a8:p.a5;
+    const tsr=ti>=0?(cond==='80'?p.r8[ti]:p.r5[ti]):null;
+    const ma=a*tsa,mr=r>0&&tsr!==null?r*tsr:0;
+    g+=ma+mr;
+    let d=a>0?`${a}×${fmtN(tsa)}`:'';
+    if(a>0&&r>0)d+=' + ';
+    if(r>0)d+=tsr!==null?`${r}×${fmtN(tsr)}`:`<span class="no">sin tasa</span>`;
+    d+=` = <strong style="font-family:var(--mono)">$${(ma+mr).toFixed(2)}</strong>`;
+    rows+=`<div class="rrow"><span style="color:var(--text2)">${p.p}</span><span style="font-size:11px;text-align:right">${d}</span></div>`;
+  });
+  if(!rows)rows=`<div class="rrow"><span style="color:var(--text2)">Ingresá altas o renovaciones por plan</span></div>`;
+  document.getElementById('sres-f').innerHTML=rows+`<div class="rtotal"><span>Total estimado</span><span style="font-family:var(--mono)">${fmt$(g)}</span></div>`;
+};
+
+window.simM=()=>{
+  const v=parseInt(document.getElementById('mv-v')?.value)||0;
+  const f=document.getElementById('mv-f')?.value==='si';
+  let t;if(v<60)t='n';else if(v>=90&&!f)t='90';else t='60';
+  const ce=document.getElementById('scond-m');if(!ce)return;
+  if(t==='n'){
+    ce.innerHTML=`<div class="acond acr">No cobra<div style="font-size:11px;opacity:0.75;margin-top:2px">${v} ventas — mínimo 60</div></div>`;
+    document.getElementById('sres-m').innerHTML=`<div class="rtotal"><span>Total</span><span>$0.00</span></div>`;return;
+  }
+  ce.innerHTML=`<div class="acond ${t==='90'?'acg':'aca'}">${t==='90'?'Tramo 90 — sin faltas':'Tramo 60'}<div style="font-size:11px;opacity:0.75;margin-top:2px">${v} ventas${f?', con faltas (aplica tramo 60)':''}</div></div>`;
+  const col=t==='90'?'c9':'c6';
+  document.getElementById('sres-m').innerHTML=PM.map(p=>`<div class="rrow"><span style="color:var(--text2)">${p.p}</span><span style="font-family:var(--mono);font-weight:500">$${p[col]}</span></div>`).join('')+`<div class="rtotal"><span>Tramo</span><span class="badge ${t==='90'?'bg':'ba'}">${t} ventas</span></div>`;
+};
+
+// ── FALTAS ──────────────────────────────────────────
+function pgFaltas(el){
+  el.innerHTML=`
+    <div class="page-title">Faltas y ausencias</div>
+    <div class="page-sub">${new Date().toLocaleDateString('es-UY',{month:'long',year:'numeric'})}</div>
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">Empleados</span>
+        <button class="btn btn-a btn-sm" onclick="openModalFalta(null)">+ Registrar falta</button>
+      </div>
+      <div class="tw"><table>
+        <thead><tr><th>Empleado</th><th>Faltas</th><th>Injust.</th><th>Just.</th><th>Médica/Lic.</th><th></th></tr></thead>
+        <tbody id="faltas-tabla"></tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">Historial</span>
+        <select id="filt-emp" style="width:auto;font-size:11px;padding:4px 8px" onchange="rFaltasHist()">
+          <option value="">Todos</option>
+          ${empleados.map(e=>`<option value="${e.id}">${e.nombre}</option>`).join('')}
+        </select>
+      </div>
+      <div id="fhist"></div>
+    </div>`;
+  rFaltasTabla();
+  rFaltasHist();
+}
+
+function rFaltasTabla(){
+  const tbody=document.getElementById('faltas-tabla');if(!tbody)return;
+  if(empleados.length===0){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:2rem">No hay empleados registrados.</td></tr>';return;}
+  tbody.innerHTML=empleados.map((e,i)=>{
+    const ft=faltasEmp(e.id);
+    const nf=ft.length;
+    const inj=ft.filter(f=>f.tipo==='injustificada').length;
+    const jus=ft.filter(f=>f.tipo==='justificada').length;
+    const med=ft.filter(f=>f.tipo==='medica'||f.tipo==='licencia').length;
+    const cls=nf===0?'bg':nf<=2?'ba':'br';
+    return`<tr>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="av av-sm ${avc(i)}">${ini(e.nombre)}</div>${e.nombre}</div></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="ctr-btn" onclick="qFalta('${e.id}',-1)" style="width:24px;height:24px;font-size:16px">−</button>
+          <span class="badge ${cls}" style="min-width:28px;text-align:center;font-size:13px">${nf}</span>
+          <button class="ctr-btn" onclick="qFalta('${e.id}',1)" style="width:24px;height:24px;font-size:16px">+</button>
+        </div>
+      </td>
+      <td>${inj>0?`<span class="badge br">${inj}</span>`:'<span style="color:var(--text3)">—</span>'}</td>
+      <td>${jus>0?`<span class="badge bg">${jus}</span>`:'<span style="color:var(--text3)">—</span>'}</td>
+      <td>${med>0?`<span class="badge ba">${med}</span>`:'<span style="color:var(--text3)">—</span>'}</td>
+      <td><button class="btn btn-sm" onclick="openModalFalta('${e.id}')">+ Registrar</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function rFaltasHist(){
+  const h=document.getElementById('fhist');if(!h)return;
+  const filt=document.getElementById('filt-emp')?.value||'';
+  const data=[...faltas].filter(f=>!filt||f.empleadoId===filt).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  if(data.length===0){h.innerHTML='<div class="empty">Sin faltas registradas</div>';return;}
+  h.innerHTML=`<div class="tw"><table><thead><tr><th>Empleado</th><th>Fecha</th><th>Tipo</th><th>Por</th><th>Observación</th><th></th></tr></thead>
+  <tbody>${data.map(f=>{
+    const e=empleados.find(x=>x.id===f.empleadoId),i=empleados.indexOf(e);
+    return`<tr>
+      <td><div style="display:flex;align-items:center;gap:7px"><div class="av av-sm ${avc(i)}">${e?ini(e.nombre):'?'}</div>${e?.nombre||'—'}</div></td>
+      <td style="font-family:var(--mono);color:var(--text2)">${f.fecha||'—'}</td>
+      <td><span class="badge ${f.tipo==='injustificada'?'br':f.tipo==='justificada'?'bg':'ba'}">${f.tipo||'—'}</span></td>
+      <td style="color:var(--text2)">${f.registrador==='rrhh'?'RRHH':'Supervisor'}</td>
+      <td style="color:var(--text2)">${f.obs||'—'}</td>
+      <td><button class="btn btn-sm btn-d" onclick="delFalta('${f.id}')">×</button></td>
+    </tr>`;}).join('')}
+  </tbody></table></div>`;
+}
+
+window.qFalta=async(empId,delta)=>{
+  if(delta===1){
+    const r=await dbPush('faltas',{empleadoId:empId,fecha:today(),tipo:'injustificada',registrador:CU.role,obs:'Carga rápida'});
+    faltas.push({id:r.key,empleadoId:empId,fecha:today(),tipo:'injustificada',registrador:CU.role,obs:'Carga rápida'});
+  } else {
+    const last=[...faltas].filter(f=>f.empleadoId===empId).pop();
+    if(last){await dbDel('faltas/'+last.id);faltas=faltas.filter(f=>f.id!==last.id);}
+  }
+  rFaltasTabla();rFaltasHist();toast('Falta actualizada');
+};
+
+window.openModalFalta=empId=>{
+  document.getElementById('mf-fecha').value=today();
+  document.getElementById('mf-obs').value='';
+  document.getElementById('mf-emp').innerHTML=`<option value="">Seleccionar...</option>`+empleados.map(e=>`<option value="${e.id}"${e.id===empId?' selected':''}>${e.nombre}</option>`).join('');
+  openMo('mo-falta');
+};
+window.guardarFalta=async()=>{
+  const empId=document.getElementById('mf-emp').value;
+  const fecha=document.getElementById('mf-fecha').value;
+  const tipo=document.getElementById('mf-tipo').value;
+  const reg=document.getElementById('mf-reg').value;
+  const obs=document.getElementById('mf-obs').value.trim();
+  if(!empId||!fecha){toast('Completá empleado y fecha');return;}
+  const r=await dbPush('faltas',{empleadoId:empId,fecha,tipo,registrador:reg,obs});
+  faltas.push({id:r.key,empleadoId:empId,fecha,tipo,registrador:reg,obs});
+  closeMo('mo-falta');rFaltasTabla();rFaltasHist();toast('Falta registrada');
+};
+window.delFalta=async id=>{
+  await dbDel('faltas/'+id);faltas=faltas.filter(f=>f.id!==id);
+  rFaltasTabla();rFaltasHist();toast('Falta eliminada');
+};
+
+// ── HORAS ───────────────────────────────────────────
+function pgHoras(el){
+  const mes=mesActual();
+  const hmes=horas.filter(h=>h.fecha&&h.fecha.startsWith(mes));
+  const totalH=hmes.reduce((a,h)=>a+(parseFloat(h.horas)||0),0);
+  const pendientes=hmes.filter(h=>h.estado==='pendiente').length;
+  const aprobadas=hmes.filter(h=>h.estado==='aprobada').length;
+
+  el.innerHTML=`
+    <div class="page-title">Horas extra</div>
+    <div class="page-sub">${new Date().toLocaleDateString('es-UY',{month:'long',year:'numeric'})}</div>
+    <div class="metrics m3">
+      <div class="mc"><div class="mc-label">Total horas</div><div class="mc-value">${totalH.toFixed(1)}h</div><div class="mc-sub">este mes</div></div>
+      <div class="mc"><div class="mc-label">Pendientes</div><div class="mc-value">${pendientes}</div><div class="mc-sub">esperando aprobación</div></div>
+      <div class="mc"><div class="mc-label">Aprobadas</div><div class="mc-value">${aprobadas}</div><div class="mc-sub">confirmadas</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">Resumen por empleado</span>
+        <button class="btn btn-a btn-sm" onclick="openModalHora(null)">+ Registrar</button>
+      </div>
+      <div id="horas-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:4px"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">Historial</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="hfilt-emp" style="width:auto;font-size:11px;padding:4px 8px" onchange="rHorasHist()">
+            <option value="">Todos</option>
+            ${empleados.map(e=>`<option value="${e.id}">${e.nombre}</option>`).join('')}
+          </select>
+          <select id="hfilt-est" style="width:auto;font-size:11px;padding:4px 8px" onchange="rHorasHist()">
+            <option value="">Todos los estados</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="aprobada">Aprobadas</option>
+            <option value="rechazada">Rechazadas</option>
+          </select>
+          ${CU.role==='rrhh'&&pendientes>0?`<button class="btn btn-a btn-sm" onclick="aprobarTodas()">Aprobar todas</button>`:''}
+        </div>
+      </div>
+      <div id="horas-hist"></div>
+    </div>`;
+  rHorasGrid();
+  rHorasHist();
+}
+
+function rHorasGrid(){
+  const g=document.getElementById('horas-grid');if(!g)return;
+  const mes=mesActual();
+  if(empleados.length===0){g.innerHTML='<div class="empty">No hay empleados registrados.</div>';return;}
+  const empConHoras=empleados.filter(e=>horas.some(h=>h.empleadoId===e.id&&h.fecha?.startsWith(mes)));
+  if(empConHoras.length===0){g.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0">Sin horas extra registradas este mes.</div>';return;}
+  g.innerHTML=empConHoras.map((e,idx)=>{
+    const i=empleados.indexOf(e);
+    const hEmp=horas.filter(h=>h.empleadoId===e.id&&h.fecha?.startsWith(mes));
+    const total=hEmp.reduce((a,h)=>a+(parseFloat(h.horas)||0),0);
+    const pend=hEmp.filter(h=>h.estado==='pendiente').length;
+    const apro=hEmp.filter(h=>h.estado==='aprobada').length;
+    return`<div class="vc">
+      <div class="vc-top">
+        <div class="av av-md ${avc(i)}">${ini(e.nombre)}</div>
+        <div>
+          <div class="vc-name">${e.nombre}</div>
+          <div class="vc-sub">${total.toFixed(1)}h totales · ${pend>0?`<span style="color:var(--amber)">${pend} pend.</span>`:''}${apro>0?` ${apro} apro.`:''}</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:6px">
+        <button class="btn btn-sm" onclick="openModalHora('${e.id}')">+ Agregar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function rHorasHist(){
+  const h=document.getElementById('horas-hist');if(!h)return;
+  const filtEmp=document.getElementById('hfilt-emp')?.value||'';
+  const filtEst=document.getElementById('hfilt-est')?.value||'';
+  const data=[...horas]
+    .filter(x=>(!filtEmp||x.empleadoId===filtEmp)&&(!filtEst||x.estado===filtEst))
+    .sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  if(data.length===0){h.innerHTML='<div class="empty">Sin horas extra registradas</div>';return;}
+  h.innerHTML=`<div class="tw"><table>
+    <thead><tr><th>Empleado</th><th>Fecha</th><th>Horas</th><th>Motivo</th><th>Estado</th><th>Aprobado por</th><th></th></tr></thead>
+    <tbody>${data.map(x=>{
+      const e=empleados.find(emp=>emp.id===x.empleadoId),i=empleados.indexOf(e);
+      const esCand=CU.role==='rrhh'||CU.role==='supervisor';
+      return`<tr>
+        <td><div style="display:flex;align-items:center;gap:7px"><div class="av av-sm ${avc(i)}">${e?ini(e.nombre):'?'}</div>${e?.nombre||'—'}</div></td>
+        <td style="font-family:var(--mono);color:var(--text2)">${x.fecha||'—'}</td>
+        <td style="font-family:var(--mono);font-weight:500">${x.horas}h</td>
+        <td style="color:var(--text2)">${x.motivo||'—'}</td>
+        <td><span class="badge ${x.estado==='aprobada'?'bg':x.estado==='rechazada'?'br':'ba'}">${x.estado||'pendiente'}</span></td>
+        <td style="color:var(--text2)">${x.aprobadoPor||'—'}</td>
+        <td style="display:flex;gap:5px">
+          ${CU.role==='rrhh'&&x.estado==='pendiente'?`
+            <button class="btn btn-sm" style="color:var(--green);border-color:var(--green)" onclick="cambiarEstadoHora('${x.id}','aprobada')">✓</button>
+            <button class="btn btn-sm btn-d" onclick="cambiarEstadoHora('${x.id}','rechazada')">✕</button>`:
+          x.estado==='pendiente'?`<button class="btn btn-sm btn-d" onclick="eliminarHora('${x.id}')">×</button>`:'—'}
+        </td>
+      </tr>`;}).join('')}
+    </tbody>
+  </table></div>`;
+}
+
+window.cambiarEstadoHora=async(id,estado)=>{
+  const h=horas.find(x=>x.id===id);if(!h)return;
+  const updated={...h,estado,aprobadoPor:CU.name};
+  await dbSet('horas/'+id,{empleadoId:updated.empleadoId,fecha:updated.fecha,horas:updated.horas,motivo:updated.motivo,estado,aprobadoPor:CU.name});
+  const idx=horas.findIndex(x=>x.id===id);
+  if(idx>=0)horas[idx]=updated;
+  rHorasGrid();rHorasHist();
+  toast(estado==='aprobada'?'Horas aprobadas':'Horas rechazadas');
+};
+
+window.aprobarTodas=async()=>{
+  const mes=mesActual();
+  const pend=horas.filter(h=>h.estado==='pendiente'&&h.fecha?.startsWith(mes));
+  for(const h of pend) await window.cambiarEstadoHora(h.id,'aprobada');
+  toast(`${pend.length} registros aprobados`);
+};
+
+window.eliminarHora=async id=>{
+  await dbDel('horas/'+id);
+  horas=horas.filter(h=>h.id!==id);
+  rHorasGrid();rHorasHist();toast('Registro eliminado');
+};
+
+window.openModalHora=empId=>{ editHoraId=null; openMoHora(empId); };
+window.editHoraId=null;
+
+function openMoHora(empId){
+  document.getElementById('mh-fecha').value=today();
+  document.getElementById('mh-horas').value='';
+  document.getElementById('mh-motivo').value='';
+  document.getElementById('mh-emp').innerHTML=`<option value="">Seleccionar...</option>`+empleados.map(e=>`<option value="${e.id}"${e.id===empId?' selected':''}>${e.nombre}</option>`).join('');
+  openMo('mo-hora');
+}
+
+window.guardarHora=async()=>{
+  const empId=document.getElementById('mh-emp').value;
+  const fecha=document.getElementById('mh-fecha').value;
+  const hrs=document.getElementById('mh-horas').value;
+  const motivo=document.getElementById('mh-motivo').value.trim();
+  if(!empId||!fecha||!hrs){toast('Completá empleado, fecha y horas');return;}
+  const data={empleadoId:empId,fecha,horas:parseFloat(hrs),motivo,estado:'pendiente',aprobadoPor:'',registradoPor:CU.name};
+  const r=await dbPush('horas',data);
+  horas.push({id:r.key,...data});
+  closeMo('mo-hora');
+  rHorasGrid();rHorasHist();
+  toast('Horas registradas — pendiente de aprobación');
+};
+
+// ── LEGAJOS ─────────────────────────────────────────
+function pgLegajos(el){
+  el.innerHTML=`
+    <div class="page-title">Legajos</div><div class="page-sub">Personal registrado</div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Empleados (${empleados.length})</span><button class="btn btn-a btn-sm" onclick="openModalEmp()">+ Nuevo</button></div>
+      ${empleados.length===0?'<div class="empty">No hay empleados. Agregá el primero.</div>':
+      `<div class="tw"><table><thead><tr><th>Nombre</th><th>Cédula</th><th>Cargo</th><th>Ingreso</th><th>Contrato</th><th>Estado</th><th></th></tr></thead>
+      <tbody>${empleados.map((e,i)=>`<tr>
+        <td><div style="display:flex;align-items:center;gap:8px"><div class="av av-sm ${avc(i)}">${ini(e.nombre)}</div>${e.nombre}</div></td>
+        <td style="font-family:var(--mono);color:var(--text2)">${e.cedula||'—'}</td>
+        <td style="color:var(--text2)">${e?.cargo||e?.rol||'vendedor'}</td>
+        <td style="font-family:var(--mono);color:var(--text2)">${e.ingreso||'—'}</td>
+        <td style="color:var(--text2)">${e.contrato||'indefinido'}</td>
+        <td><span class="badge ${!e.estado||e.estado==='activo'?'bg':e.estado==='licencia'?'ba':'br'}">${e.estado||'activo'}</span></td>
+        <td style="display:flex;gap:6px">
+          <button class="btn btn-sm" onclick="openModalEmp('${e.id}')">Editar</button>
+          <button class="btn btn-sm btn-d" onclick="delEmp('${e.id}')">×</button>
+        </td>
+      </tr>`).join('')}</tbody></table></div>`}
+    </div>`;
+}
+
+let editEmpId=null;
+window.openModalEmp=id=>{
+  editEmpId=id||null;
+  document.getElementById('mo-emp-title').textContent=id?'Editar empleado':'Nuevo empleado';
+  const e=id?empleados.find(x=>x.id===id):null;
+  document.getElementById('me-nombre').value=e?.nombre||'';
+  document.getElementById('me-cedula').value=e?.cedula||'';
+  document.getElementById('me-rol').value=e?.cargo||e?.rol||'vendedor';
+  document.getElementById('me-ingreso').value=e?.ingreso||today();
+  document.getElementById('me-contrato').value=e?.contrato||'indefinido';
+  document.getElementById('me-estado').value=e?.estado||'activo';
+  document.getElementById('me-tel').value=e?.tel||'';
+  document.getElementById('me-dir').value=e?.dir||'';
+  document.getElementById('me-emerg').value=e?.emergencia||'';
+  openMo('mo-emp');
+};
+window.guardarEmp=async()=>{
+  const nombre=document.getElementById('me-nombre').value.trim();
+  if(!nombre){toast('El nombre es obligatorio');return;}
+  const data={nombre,cedula:document.getElementById('me-cedula').value.trim(),cargo:document.getElementById('me-rol').value,ingreso:document.getElementById('me-ingreso').value,contrato:document.getElementById('me-contrato').value,estado:document.getElementById('me-estado').value,tel:document.getElementById('me-tel').value.trim(),dir:document.getElementById('me-dir').value.trim(),emergencia:document.getElementById('me-emerg').value.trim()};
+  if(editEmpId){
+    await dbSet('empleados/'+editEmpId,data);
+    const idx=empleados.findIndex(e=>e.id===editEmpId);
+    if(idx>=0)empleados[idx]={id:editEmpId,...data};
+  } else {
+    const r=await dbPush('empleados',data);
+    empleados.push({id:r.key,...data});
+  }
+  closeMo('mo-emp');renderPg(curPage,document.getElementById('pg-'+curPage));toast(editEmpId?'Empleado actualizado':'Empleado agregado');
+};
+window.delEmp=async id=>{
+  if(!confirm('¿Eliminar este empleado?'))return;
+  await dbDel('empleados/'+id);empleados=empleados.filter(e=>e.id!==id);
+  renderPg(curPage,document.getElementById('pg-'+curPage));toast('Empleado eliminado');
+};
+
+// ── CONFIG ──────────────────────────────────────────
+function pgConfig(el){
+  el.innerHTML=`
+    <div class="page-title">Configuración</div><div class="page-sub">Usuarios y sistema</div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Usuarios del sistema</span><button class="btn btn-a btn-sm" onclick="nuevoUsuario()">+ Nuevo</button></div>
+        <div id="users-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px">Tablas de comisiones</div>
+        <div class="cbox cg"><div class="cbox-title">Fibra — Tabla 80</div><div class="cbox-desc">12 planes · sin faltas + 80+ ventas</div></div>
+        <div class="cbox ca"><div class="cbox-title">Fibra — Tabla 50</div><div class="cbox-desc">12 planes · 50+ ventas o con faltas</div></div>
+        <div class="cbox" style="background:var(--blue-bg);border-color:rgba(96,165,250,0.15);color:var(--blue)"><div class="cbox-title">Móvil — 10 planes</div><div class="cbox-desc">Tramos 60 y 90 ventas</div></div>
+        <button class="btn btn-sm" style="margin-top:8px" onclick="nav('simulador')">Ver en simulador</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-hdr">
+        <div>
+          <div class="card-title">Personal del sistema</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">Cargá el listado base o actualizá los cargos del personal existente.</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm" onclick="actualizarCargos()">Actualizar cargos</button>
+          <button class="btn btn-a btn-sm" onclick="seedEmpleados()">Cargar listado base</button>
+        </div>
+      </div>
+      <div id="seed-res"></div>
+    </div>`;
+  rUsersList();
+}
+
+async function rUsersList(){
+  const ul=document.getElementById('users-list');if(!ul)return;
+  const u=await dbGet('users')||{};
+  ul.innerHTML=`<div class="tw"><table><thead><tr><th>Usuario</th><th>Nombre</th><th>Cargo</th><th></th></tr></thead>
+  <tbody>${Object.entries(u).map(([u,v])=>`<tr>
+    <td style="font-family:var(--mono)">${u}</td><td>${v.name}</td>
+    <td><span class="badge ${v.role==='supervisor'?'bv':'bi'}">${v.role}</span></td>
+    <td>${u!=='admin'?`<button class="btn btn-sm btn-d" onclick="delUsuario('${u}')">×</button>`:'—'}</td>
+  </tr>`).join('')}</tbody></table></div>`;
+}
+
+window.seedEmpleados=async()=>{
+  const btn=document.querySelector('[onclick="seedEmpleados()"]');
+  if(btn){btn.textContent='Cargando...';btn.disabled=true;}
+  let agregados=0,omitidos=0;
+  for(const e of EMPLEADOS_SEED){
+    const nombre=e.nombre;
+    const yaExiste=empleados.some(x=>matchNombre(x.nombre,nombre));
+    if(yaExiste){omitidos++;continue;}
+    const r=await dbPush('empleados',{nombre,cedula:e.cedula,cargo:e.cargo,contrato:'indefinido',estado:'activo',ingreso:''});
+    empleados.push({id:r.key,nombre,cedula:e.cedula,cargo:e.cargo,contrato:'indefinido',estado:'activo',ingreso:''});
+    agregados++;
+  }
+  if(btn){btn.textContent='Cargar listado base';btn.disabled=false;}
+  const res=document.getElementById('seed-res');
+  if(res) res.innerHTML=`<div class="cbox cg" style="margin-top:10px"><div class="cbox-title">Completado</div><div class="cbox-desc">${agregados} empleados agregados · ${omitidos} ya existían</div></div>`;
+  toast(`${agregados} empleados cargados`);
+};
+
+window.actualizarCargos=async()=>{
+  const btn=document.querySelector('[onclick="actualizarCargos()"]');
+  if(btn){btn.textContent='Actualizando...';btn.disabled=true;}
+  let actualizados=0;
+  for(const seed of EMPLEADOS_SEED){
+    const emp=empleados.find(e=>matchNombre(e.nombre,seed.nombre)||e.cedula===seed.cedula);
+    if(emp&&(emp.cargo!==seed.cargo||emp.cedula!==seed.cedula)){
+      const updated={...emp,cargo:seed.cargo,cedula:seed.cedula};
+      await dbSet('empleados/'+emp.id,{nombre:updated.nombre,cedula:updated.cedula,cargo:updated.cargo,ingreso:updated.ingreso||'',contrato:updated.contrato||'indefinido',estado:updated.estado||'activo',tel:updated.tel||'',dir:updated.dir||'',emergencia:updated.emergencia||''});
+      const idx=empleados.findIndex(e=>e.id===emp.id);
+      if(idx>=0) empleados[idx]=updated;
+      actualizados++;
+    }
+  }
+  if(btn){btn.textContent='Actualizar cargos';btn.disabled=false;}
+  const res=document.getElementById('seed-res');
+  if(res) res.innerHTML=`<div class="cbox cg" style="margin-top:10px"><div class="cbox-title">Completado</div><div class="cbox-desc">${actualizados} empleados actualizados</div></div>`;
+  toast(`${actualizados} cargos actualizados`);
+};
+
+window.nuevoUsuario=async()=>{
+  const u=prompt('Usuario:');if(!u)return;
+  const p=prompt('Contraseña:');if(!p)return;
+  const r=prompt('Rol (supervisor / rrhh):');
+  if(!r||!['supervisor','rrhh'].includes(r)){toast('Rol inválido');return;}
+  const n=prompt('Nombre completo:');if(!n)return;
+  await dbSet('users/'+u,{username:u,password:p,role:r,name:n});
+  rUsersList();toast('Usuario creado');
+};
+window.delUsuario=async u=>{
+  if(!confirm('¿Eliminar usuario '+u+'?'))return;
+  await dbDel('users/'+u);rUsersList();toast('Usuario eliminado');
+};
+
+// ── RRHH INICIO ─────────────────────────────────────
+function pgRrhh(el){
+  const tf=faltas.filter(f=>f.fecha?.startsWith(mes())).length;
+  const cf=new Set(faltas.filter(f=>f.fecha?.startsWith(mes())).map(f=>f.empleadoId)).size;
+  el.innerHTML=`
+    <div class="page-title">Panel RRHH</div>
+    <div class="page-sub">${new Date().toLocaleDateString('es-UY',{month:'long',year:'numeric'})}</div>
+    <div class="metrics m3">
+      <div class="mc"><div class="mc-label">Total empleados</div><div class="mc-value">${empleados.length}</div></div>
+      <div class="mc"><div class="mc-label">Faltas este mes</div><div class="mc-value">${tf}</div></div>
+      <div class="mc"><div class="mc-label">Sin faltas</div><div class="mc-value">${empleados.length-cf}</div></div>
+    </div>
+    <div class="g2">
+      <div class="card"><div class="card-hdr"><span class="card-title">Accesos rápidos</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          ${[['faltas','Gestionar faltas'],['personal','Ver personal'],['importar','Importar ventas']].map(([id,l])=>`<button class="btn" style="text-align:left" onclick="nav('${id}')">${l}</button>`).join('')}
+        </div>
+      </div>
+      <div class="card"><div class="card-hdr"><span class="card-title">Últimas faltas</span></div>
+        ${faltas.slice(-5).reverse().map(f=>{
+          const e=empleados.find(x=>x.id===f.empleadoId),i=empleados.indexOf(e);
+          return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px">
+            <div class="av av-sm ${avc(i)}">${e?ini(e.nombre):'?'}</div>
+            <span style="flex:1">${e?.nombre||'—'}</span>
+            <span class="badge ${f.tipo==='injustificada'?'br':f.tipo==='justificada'?'bg':'ba'}">${f.tipo}</span>
+            <span style="color:var(--text3);font-family:var(--mono)">${f.fecha||''}</span>
+          </div>`;}).join('')||'<div class="empty">Sin faltas</div>'}
+      </div>
+    </div>`;
+}
+
+// ── IMPORTAR ────────────────────────────────────────
+function pgImportar(el){
+  el.innerHTML=`
+    <div class="page-title">Importar ventas</div>
+    <div class="page-sub">CSV o Excel · columnas: Nuevo plan · Motivo de cambio de plan · Vendedor</div>
+    <div class="card">
+      <div class="upzone" onclick="document.getElementById('csv-in').click()">
+        <div class="up-icon">↑</div>
+        <div class="up-label">Seleccioná tu archivo</div>
+        <div class="up-sub">.csv o .xlsx — Se omiten: vendedores con RN y Pasaje de tecnología</div>
+      </div>
+      <input type="file" id="csv-in" accept=".csv,.xlsx,.xls" style="display:none" onchange="importArchivo(this)">
+      <div id="imp-res" style="margin-top:14px"></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px">Formato esperado</div>
+      <div class="tw"><table><thead><tr><th>Nuevo plan</th><th>Motivo de cambio de plan</th><th>Vendedor</th></tr></thead>
+      <tbody>
+        <tr><td>FIBRA BÁSICO</td><td>Cambio de plan</td><td>Juan García</td></tr>
+        <tr><td>FIBRA PREMIUM</td><td>Renovacion</td><td>María López</td></tr>
+      </tbody></table></div>
+      ${ventas.length>0?`<div style="margin-top:10px;font-size:11px;color:var(--text3)">${ventas.length} registros cargados en el mes actual.</div>`:''}
+    </div>`;
+}
+
+async function procesarFilas(rows){
+  let ok=0,skip=0,noMatch=0;
+  const m=mes();
+  const hdr=rows[0].map(h=>String(h||'').trim().toLowerCase());
+  const pi=hdr.findIndex(h=>h.includes('plan'));
+  const mi=hdr.findIndex(h=>h.includes('motivo'));
+  const vi=hdr.findIndex(h=>h.includes('vendedor'));
+  if(pi<0||mi<0||vi<0){
+    document.getElementById('imp-res').innerHTML=`<div class="cbox cr"><div class="cbox-title">Error de formato</div><div class="cbox-desc">No se encontraron las columnas: Nuevo plan, Motivo de cambio de plan, Vendedor.</div></div>`;return;
+  }
+  for(let i=1;i<rows.length;i++){
+    const c=rows[i];
+    const plan=String(c[pi]||'').trim();
+    const motivo=String(c[mi]||'').trim();
+    const vendedorRaw=String(c[vi]||'').trim();
+    if(!plan||!motivo||!vendedorRaw){skip++;continue;}
+    if(/\bRN\b/i.test(vendedorRaw)){skip++;continue;}
+    if(motivo==='Pasaje de tecnologia'){skip++;continue;}
+    // Buscar coincidencia en legajos normalizando tildes/mayúsculas
+    const empMatch=empleados.find(e=>matchNombre(e.nombre,vendedorRaw));
+    const vendedor=empMatch?empMatch.nombre:normNombre(vendedorRaw);
+    const r=await dbPush('ventas',{plan,motivo,vendedor,fecha:m+'-01'});
+    ventas.push({id:r.key,plan,motivo,vendedor,fecha:m+'-01'});
+    ok++;
+  }
+  document.getElementById('imp-res').innerHTML=`<div class="cbox cg"><div class="cbox-title">Importación completada</div><div class="cbox-desc">${ok} registros importados · ${skip} omitidos</div></div>`;
+  toast(`${ok} ventas importadas`);
+}
+
+window.importArchivo=async input=>{
+  const file=input.files[0];if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  document.getElementById('imp-res').innerHTML=`<div style="font-size:12px;color:var(--text2);padding:8px 0">Procesando archivo...</div>`;
+
+  if(ext==='csv'){
+    const text=await file.text();
+    const lines=text.split('\n').filter(l=>l.trim());
+    const rows=lines.map(l=>l.split(',').map(x=>x.trim().replace(/^"|"$/g,'')));
+    await procesarFilas(rows);
+  } else if(ext==='xlsx'||ext==='xls'){
+    if(!window.XLSX){
+      document.getElementById('imp-res').innerHTML=`<div class="cbox ca"><div class="cbox-title">Cargando librería...</div><div class="cbox-desc">Esperá un momento y volvé a intentar.</div></div>`;return;
+    }
+    const buf=await file.arrayBuffer();
+    const wb=XLSX.read(buf,{type:'array'});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    await procesarFilas(rows);
+  } else {
+    document.getElementById('imp-res').innerHTML=`<div class="cbox cr"><div class="cbox-title">Formato no soportado</div><div class="cbox-desc">Usá un archivo .csv o .xlsx</div></div>`;
+  }
+};
+
+// ── MODAL HELPERS ────────────────────────────────────
+window.openMo=id=>document.getElementById(id).classList.add('visible');
+window.closeMo=id=>document.getElementById(id).classList.remove('visible');
+document.getElementById('mo-falta').addEventListener('click',e=>{if(e.target===e.currentTarget)closeMo('mo-falta');});
+document.getElementById('mo-emp').addEventListener('click',e=>{if(e.target===e.currentTarget)closeMo('mo-emp');});
+document.getElementById('mo-hora').addEventListener('click',e=>{if(e.target===e.currentTarget)closeMo('mo-hora');});
+
+// ── TOAST ────────────────────────────────────────────
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+init();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</body>
+</html>
