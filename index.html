@@ -590,7 +590,12 @@ function pgVentas(el){
   const altas=vm.filter(v=>v.motivo!=='Renovacion').length;
   const renov=vm.filter(v=>v.motivo==='Renovacion').length;
   const porEmp={};
-  vm.forEach(v=>{if(!porEmp[v.vendedor])porEmp[v.vendedor]={a:0,r:0};v.motivo==='Renovacion'?porEmp[v.vendedor].r++:porEmp[v.vendedor].a++;});
+  vm.forEach(v=>{
+    const empMatch=empleados.find(e=>matchNombre(e.nombre,v.vendedor));
+    const key=empMatch?empMatch.nombre:v.vendedor;
+    if(!porEmp[key])porEmp[key]={a:0,r:0,empId:empMatch?.id||null};
+    v.motivo==='Renovacion'?porEmp[key].r++:porEmp[key].a++;
+  });
   el.innerHTML=`
     <div class="page-title">Ventas</div>
     <div class="page-sub">${new Date().toLocaleDateString('es-UY',{month:'long',year:'numeric'})}</div>
@@ -605,8 +610,7 @@ function pgVentas(el){
       `<div class="tw"><table><thead><tr><th>Vendedor</th><th>Altas</th><th>Renov.</th><th>Total</th><th>Faltas</th><th>Condición Fibra</th></tr></thead>
       <tbody>${Object.entries(porEmp).sort((a,b)=>(b[1].a+b[1].r)-(a[1].a+a[1].r)).map(([nombre,d])=>{
         const total=d.a+d.r;
-        const emp=empleados.find(e=>e.nombre===nombre);
-        const nf=emp?cntFaltas(emp.id):0;
+        const nf=d.empId?cntFaltas(d.empId):0;
         let cond,cc;
         if(total<50){cond='No cobra';cc='br';}
         else if(total>=80&&nf===0){cond='Tabla 80';cc='bg';}
@@ -622,8 +626,15 @@ function pgVentas(el){
 function pgComisiones(el){
   const vm=ventasMes();
   const porEmp={};
-  empleados.forEach(e=>{porEmp[e.nombre]={a:0,r:0,nf:cntFaltas(e.id)};});
-  vm.forEach(v=>{if(!porEmp[v.vendedor])porEmp[v.vendedor]={a:0,r:0,nf:0};v.motivo==='Renovacion'?porEmp[v.vendedor].r++:porEmp[v.vendedor].a++;});
+  // Inicializar con empleados del legajo incluyendo sus faltas reales
+  empleados.forEach(e=>{porEmp[e.nombre]={a:0,r:0,nf:cntFaltas(e.id),empId:e.id};});
+  vm.forEach(v=>{
+    // Buscar el empleado que matchea el nombre del vendedor (normalizando)
+    const empMatch=empleados.find(e=>matchNombre(e.nombre,v.vendedor));
+    const key=empMatch?empMatch.nombre:v.vendedor;
+    if(!porEmp[key]) porEmp[key]={a:0,r:0,nf:empMatch?cntFaltas(empMatch.id):0,empId:empMatch?.id||null};
+    v.motivo==='Renovacion'?porEmp[key].r++:porEmp[key].a++;
+  });
   const rows=Object.entries(porEmp).filter(([,d])=>d.a+d.r>0).map(([nombre,d])=>{
     const tv=d.a+d.r;
     let cond;
